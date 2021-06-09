@@ -688,118 +688,93 @@ colnames(lijepo) <- colnames(lijepo) %>%
                 '^x(\\d_[[:lower:]]+).*',
                 '\\1')
 
-# ### Obrnuto kodiranje varijabli
+##### Brisanje stupaca
 
-# Neka od pitanja u ovom upitnik potrebno je obrnuto kodirati. To možemo učiniti pomoću funkcije `reverse.code` iz `psych` paketa. Ta funkcija ima dva obavezna argumenta: `keys`, koji je vektor brojki `1` i `-1`, te `items`, što su čestice koje treba rekodirati.
+# Ponekad se u podacima nađu varijable koje nam nisu potrebne, pa je zgodno
+# znati kako ih možemo obrisati. Za potrebe ove demonstracije, obrisat ćemo
+# dvije varijable - `mf_CareHarm` i `mf_FairnessCheating` - koje su ukupni
+# rezultati na dvije subskale MFQ-a.
 
-# Za primjer, rekodirat ćemo 3. i 4. pitanje skale `moralIdentityInternalization`.
-
-podaci %>%
-select(contains('Internal')) %>%
-head(.) %T>% print(.) %>%
-{reverse.code(keys = c(1, 1, -1, -1, 1),
-                    items = .,
-                    # zadajemo maksimum i minimum skale
-                    # jer inače određuje prema vrijednostima
-                    # koje se zapravo pojavljuju, a neke
-                    # čestice imaju manji raspon od
-                    # teoretski mogućeg
-                    mini = 0, maxi = 7)} %T>%
-str(.) %>% head(.)
-
-# Sad kad smo se uvjerili da su varijable ispravno rekodirane, možemo skratiti postupak (recimo, tako da ciljamo samo one varijable koje zapravo treba rekodirati) i te rekodirane varijable dodati u `data.frame`.
-
-podaci %<>%
-# contains smo promijenili u matches
-select(matches('Internal.*(03|04)$')) %>%
-# u keys ostavljamo samo onoliko -1 koliko
-# imamo varijabli
-{reverse.code(keys = c(-1, -1),
-                    items = .,
-                    mini = 0, maxi = 7)} %>%
-# reverse.code nam vraća matrix, pa ga pretvaramo
-# u data.frame
-as.data.frame(.) %$%
-# otkrivamo imena varijabli kako bismo ih mogli
-# koristiti direktno; tibble je dio tidyversea
-add_column(podaci,
-                   moralIdentityInternalization03_rec =
-                   # ime varijable moramo staviti u `` (backticks)
-                   # jer R inače baca error zbog - na kraju imena
-                   # (taj - tumači kao sintaksu, a ne kao dio imena)
-                   `moralIdentityInternalization03-`,
-                   moralIdentityInternalization04_rec =
-                   `moralIdentityInternalization04-`,
-                   # pomoću .after definiramo iza kojeg stupca
-                   # želimo dodati nove stupce; ovdje to radimo
-                   # zato da bi mII varijable bile na okupu
-                   .after = 'moralIdentityInternalization05')
-
-colnames(podaci) %>% print(.)
-
-#
-# ### Brisanje stupaca
-
-# Ponekad se u podacima nađu varijable koje nam nisu potrebne, pa je zgodno znati kako ih možemo obrisati. Za potrebe ove demonstracije, obrisat ćemo dvije varijable - `mf_CareHarm` i `mf_FairnessCheating` - koje su ukupni rezultati na dvije subskale MFQ-a.
-
-# Jedan način za brisanje je upisivanje posebne vrijednosti `NULL` u stupac kojeg se želimo riješiti.
+# Jedan način za brisanje je upisivanje posebne vrijednosti `NULL` u stupac
+# kojeg se želimo riješiti.
 
 podaci$mf_CareHarm <- NULL
 
-podaci %>% select(., starts_with('mf_')) %>% str(.)
+podaci %>%
+    select(.,
+           starts_with('mf_')) %>%
+    glimpse(.)
 
-# Drugi je prepisivanje (u smislu *overwrite*) varijable koja drži `data.frame` `data.frameom` koji sadrži sve varijable osim te koju želimo ukloniti. To možemo učiniti pomoću funkcije `select` i negacijskog operatora `-`.
+# Drugi je prepisivanje (u smislu *overwrite*) varijable koja drži `data.frame`
+# `data.frameom` koji sadrži sve varijable osim te koju želimo ukloniti. To
+# možemo učiniti pomoću funkcije `select()` i negacijskog operatora `-`.
 
-podaci %<>%
-select(-mf_FairnessCheating)
-
-podaci %>% select(., starts_with('mf_')) %>% str(.)
-
-#
-# ### Stvaranje nove varijable pomoću `mutate`
-
-# Već smo vidjeli neke načine na koje možemo stvarati nove varijable. Sada ćemo pomoću funkcije `mutate` rekreirati dva stupca koja smo malo prije obrisali.
-#
-# Kao rezultat na subskali uzet ćemo prosječnu vrijednost odabranih odgovora svakog sudionika.
+podaci <- podaci %>%
+    select(.,
+           -mf_FairnessCheating)
 
 podaci %>%
-# koristimo rowMeans, koji računa aritmetičku sredinu svakog reda,
-# kao što i samo ime kaže. funkciju primjenjujemo na varijable
-# koje završavaju s 'care', što možemo napraviti jer smo bili
-# mudri i smisleno i sustavno imenovali varijable
-mutate(.,
-             mf_CareHarm = rowMeans(select(.,
-                                                  ends_with('care'))),
-             mf_FairnessCheating = rowMeans(select(.,
-                                                          ends_with('fair')))) %>%
-# kad koristimo select, redoslijed kojim unosimo varijable u funkciju
-# određuje redoslijed varijabli nakon odabira stupaca. stoga, budući da
-# mutate vraća data.frame, možemo iskoristiti select da nove varijable
-# preselimo do njima srodnih. primijetit ćemo da u selectu možemo
-# kombinirati numeričke indekse i imena varijabli; koristimo
-# everything() za dodavanje svih preostalih varijabli
-select(., 1:mf_SanctityDegradation, mf_CareHarm, mf_FairnessCheating,
-      everything()) %>% str(.)
+    select(.,
+           starts_with('mf_')) %>%
+    glimpse(.)
+
+##### Stvaranje nove varijable pomoću `mutate()`
+
+# Već smo vidjeli neke načine na koje možemo stvarati nove varijable. Sada ćemo
+# pomoću funkcije `mutate()` rekreirati dva stupca koja smo malo prije obrisali.
+# Kao rezultat na subskali uzet ćemo prosječnu vrijednost odabranih odgovora
+# svakog sudionika.
+
+podaci %>%
+    # koristimo `rowMeans()`, koji računa aritmetičku sredinu svakog reda,
+    # kao što i samo ime kaže. Funkciju primjenjujemo na varijable
+    # koje završavaju s 'care', što možemo napraviti jer smo bili
+    # mudri i smisleno i sustavno imenovali varijable
+    mutate(.,
+           mf_CareHarm = rowMeans(select(.,
+                                         ends_with('care'))),
+           mf_FairnessCheating = rowMeans(select(.,
+                                                 ends_with('fair')))) %>%
+    # kad koristimo `select()`, redoslijed kojim unosimo varijable u funkciju
+    # određuje redoslijed varijabli nakon odabira stupaca. stoga, budući da
+    # mutate vraća cijelu tablicu, možemo iskoristiti `select()` da nove varijable
+    # preselimo do njima srodnih. primijetite da u `select()` možemo
+    # kombinirati numeričke indekse i imena varijabli; koristimo
+    # `everything()` za dodavanje svih preostalih varijabli
+    select(.,
+           1:mf_SanctityDegradation,
+           mf_CareHarm,
+           mf_FairnessCheating,
+           everything()) %>%
+    glimpse(.)
 
 # Vidimo da dobivamo što smo i htjeli, pa spremamo promjene.
 
-podaci %<>%
-mutate(.,
-              mf_CareHarm = rowMeans(select(.,
-                                                   ends_with('care'))),
-              mf_FairnessCheating = rowMeans(select(.,
-                                                    ends_with('fair')))) %>%
-select(., 1:mf_SanctityDegradation, mf_CareHarm, mf_FairnessCheating,
-              everything())
+podaci <- podaci %>%
+    mutate(.,
+           mf_CareHarm = rowMeans(select(.,
+                                         ends_with('care'))),
+           mf_FairnessCheating = rowMeans(select(.,
+                                                 ends_with('fair')))) %>%
+    select(.,
+           1:mf_SanctityDegradation,
+           mf_CareHarm,
+           mf_FairnessCheating,
+           everything())
 
-#
-# ## Long i wide formati podataka
+##### Long i wide formati podataka
 
-# Podaci kojima cijelo vrijeme baratamo nalaze se u *wide* formatu - svaki red predstavlja jedan *case* (u našem slučaju sudionika), a svaki stupac predstavlja jednu varijablu. Često, to je format s kojim želimo raditi.
+# Podaci kojima cijelo vrijeme baratamo nalaze se u *wide* formatu - svaki red
+# predstavlja jedan *case* (u našem slučaju sudionika), a svaki stupac
+# predstavlja jednu varijablu. Često, to je format s kojim želimo raditi.
 
-# Ipak, ponekad nam je zgodno podatke prebaciti u *long* format, u kojem svaki *case* zauzima nekoliko redova. Takav format je potreban za, recimo, multilevel modeliranje u R-u.
+# Ipak, ponekad nam je zgodno podatke prebaciti u *long* format, u kojem svaki
+# *case* zauzima nekoliko redova. Takav format je potreban za, recimo,
+# multilevel modeliranje u R-u.
 
-# Za potrebe demonstracije prebacivanja iz jednog formata u drugi, napravit ćemo novi `data.frame`, koji sadrži podskup varijabli i *caseova* iz `data.framea` `podaci`.
+# Za potrebe demonstracije prebacivanja iz jednog formata u drugi, napravit ćemo
+# novi `data.frame`, koji sadrži podskup varijabli i *caseova* iz
+# `data.framea` `podaci`.
 
 podaci %>%
 # slice nam omogućuje da biramo
