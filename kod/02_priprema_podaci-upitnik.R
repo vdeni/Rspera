@@ -765,7 +765,7 @@ podaci <- podaci %>%
 ##### Long i wide formati podataka
 
 # Podaci kojima cijelo vrijeme baratamo nalaze se u *wide* formatu - svaki red
-# predstavlja jedan *case* (u našem slučaju sudionika), a svaki stupac
+# predstavlja, u našem slučaju, jednog sudionika, a svaki stupac
 # predstavlja jednu varijablu. Često, to je format s kojim želimo raditi.
 
 # Ipak, ponekad nam je zgodno podatke prebaciti u *long* format, u kojem svaki
@@ -776,35 +776,51 @@ podaci <- podaci %>%
 # novi `data.frame`, koji sadrži podskup varijabli i *caseova* iz
 # `data.framea` `podaci`.
 
-podaci %>%
-# slice nam omogućuje da biramo
-# redove prema indeksu. uzet ćemo
-# prvih 10 sudionika
-slice(., 1:10) %>%
-select(pi_gender, starts_with('descriptive')) %>%
-# dodajemo eksplicitni indeks za svakog sudionika
-add_column(., sub_index = 1:nrow(.)) ->
-podaci_wide
+podaci_wide <- podaci %>%
+    # slice nam omogućuje da biramo
+    # redove prema indeksu. uzet ćemo
+    # prvih 10 sudionika
+    slice(.,
+          1:10) %>%
+    select(.,
+           pi_gender,
+           starts_with('descriptive')) %>%
+    # dodajemo eksplicitni indeks za svakog sudionika
+    mutate(.,
+           sub_index = 1:nrow(.))
 
-podaci_wide
+# `podaci_wide`, dakle, sadrži podskup `podataka`, u wide formatu. Sad ćemo taj
+# `data.frame` prebaciti u long format. Za to možemo iskoristiti funkciju
+# `pivot_longer()`. Ta funkcija je dosta moćna, no ovdje ćemo demonstirati
+# samo jedan bazičan slučaj. Kao prvi argument funkciji ćemo dati tablicu
+# koju želimo prebaciti u dugi format.
 
-# `podaci_wide`, dakle, sadrži podskup `podataka`, u wide formatu. Sad ćemo taj `data.frame` prebaciti u long format, koristeći funkciju `gather` (kao, bacamo sve na hrpu) iz `tidyr` paketa.
+podaci_long <- pivot_longer(podaci_wide,
+                            # argumentom `cols` definiramo stupce koje želimo
+                            # prebaciti u dugi format. ovdje ćemo odabrati sve
+                            # varijable koje počinju s 'descriptive'. za to
+                            # možemo koristiti iste pomoćne funkcije koje možemo
+                            # koristiti i u `select()`.
+                            cols = starts_with('descriptive'),
+                            # u argument `names_to` upisujemo ime varijable u
+                            # dugoj tablici u koju želimo unpisati imena
+                            # varijabli iz široke tablice koje smo definirali u
+                            # `cols`
+                            names_to = 'pitanje',
+                            # u `values_to` argument upisujemo ime varijable
+                            # koja treba sadržavati vrijednosti varijabli
+                            # definiranih u `cols` argumentu
+                            values_to = 'odgovor')
 
-# `gatheru` moramo dati neku tablicu s podacima (dakle, recimo, `data.frame`), odrediti ime varijable koja će služiti kao `key`, ime varijable koja će služiti kao `value`, te stupce koje želimo svesti na `key` - `value` format.
-
-podaci_wide %>%
-gather(., key = 'pitanje', value = 'odgovor',
-             descriptiveSocialNorms01:descriptiveSocialNorms04) ->
 podaci_long
 
-podaci_long
+# Za prebacivanje podataka u široki format, koristit ćemo funkciju
+# `pivot_wider`. Ta funkcija radi slično kao i `pivot_wider`.
 
-# Za prebacivanje natrag u wide format, koristimo `spread` (kao, bacanje đubreta po livadi).
-
-# Ovoj funkciji trebamo dati podatke (recimo, `data.frame`), `key` koji želimo "rastaviti" i `value`, što su vrijednosti koje trebamo potpisati pod stupce nastale rastavljanjem `key`.
-#
-# `spread` uzima jedinstvene vrijednosti iz varijable navedene kao `key` i širi ih u nove varijable, koje potom puni vrijednostima zadanima pod `value`.
-
-podaci_long %>%
-spread(., key = pitanje, value = odgovor) %>%
-arrange(., sub_index)
+pivot_wider(podaci_long,
+            # u argumentu `names_from` definiramo varijablu u dugoj tablici u
+            # kojoj se nalaze imena novih varijabli za široku tablicu
+            names_from = 'pitanje',
+            # slično tome, kao argument za `values_from` dajemo varijablu u
+            # dugoj tablici u kojoj se nalaze pripadajuće vrijednosti
+            values_from = 'odgovor')
