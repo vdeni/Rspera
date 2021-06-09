@@ -535,110 +535,159 @@ podaci$pi_income
 
 ##### Preimenovanje varijabli
 
-# Nekad su imena varijabli jako nezgrapna, neinformativna, mutava i slično. Budući da ćete se prije ili poslije susresti s takvim imenima, proći ćemo kroz nekoliko načina za mijenjanje imena varijabli.
+# Nekad su imena varijabli jako nezgrapna ili neinformativna. Budući da ćete se
+# prije ili poslije susresti s takvim imenima, proći ćemo kroz nekoliko načina
+# za mijenjanje imena varijabli.
 
-# Ako želimo promijeniti imena manjeg broja varijabli, možemo koristiti funkciju `rename`. Na primjer, varijable `charitableBehavior01` i `charitableBehavior02` ne govore ništa o tome što su. Jedna je namjera doniranja novca, a druga namjera doniranja vremena. Stoga, preimenovat ćemo ih u `donationMoney` i `donationTime`.
+# Ako želimo promijeniti imena manjeg broja varijabli, možemo koristiti funkciju
+# `rename()`. Na primjer, varijable `charitableBehavior01` i
+# `charitableBehavior02` ne govore ništa o tome što su. Jedna je namjera
+# doniranja novca, a druga namjera doniranja vremena. Stoga, preimenovat ćemo ih
+# u `donationMoney` i `donationTime`.
+
+podaci <- podaci %>%
+    rename(.,
+           'donationMoney' = 'charitableBehavior01',
+           'donationTime' = 'charitableBehavior02')
 
 podaci %>%
-select(10:11) %>%
-colnames(.)
+    select(10:11) %>%
+    colnames(.)
 
-podaci %<>%
-rename(., donationMoney = charitableBehavior01,
-      donationTime = charitableBehavior02)
+# Ako trebamo preimenovati veći broj varijabli i ako smo te sreće da njihova
+# imena možemo uhvatiti regularnim izrazima, možemo koristiti `str_replace()`.
 
-podaci %>%
-select(10:11) %>%
-colnames(.)
+# Na primjer, imamo 32 varijable koje se zovu `moralFoundationsXX` i koje
+# predstavljaju pitanja na Moral Foundations Questionnaireu. MFQ se sastoji od 5
+# faktora (authority, care, loyalty, fairness, sanctity) - svaki faktor
+# reprezentiran je sa 6 pitanja. Osim toga, ima i dvije kontrolne čestice.
 
-# Ako trebamo preimenovati veći broj varijabli i ako smo te sreće da njihova imena možemo uhvatiti regularnim izrazima, možemo koristiti `str_replace`.
+# Preimenovat ćemo varijable tako da na kraj imena svake od njih dodamo oznaku
+# faktora kojoj pripada. Za to ćemo koristiti funkciju `str_replace()`, koja nam
+# omogućuje da neki obrazac definiran regularnim izrazom zamijenimo nekim drugim
+# stringom. Na primjer:
 
-# Na primjer, imamo 32 varijable koje se zovu `moralFoundationsXX` i koje predstavljaju pitanja na Moral Foundations Questionnaireu. MFQ se sastoji od 5 faktora (authority, care, loyalty, fairness, sanctity) - svaki faktor reprezentiran je sa 6 pitanja. Osim toga, ima i dvije kontrolne čestice.
-
-# Preimenovat ćemo varijable tako da na kraj imena svake od njih dodamo oznaku faktora kojoj pripada. Za to ćemo koristiti funkciju `str_replace`, koja nam omogućuje da neki obrazac definiran regexom zamijenimo nekim drugim stringom.
-
-qc(orahovica, orašar) %>%
-str_replace(., 'ora(h|š)', 'bor')
+c('orahovica', 'orašar') %>%
+    str_replace(.,
+                'ora(h|š)',
+                'bor')
 
 # Sad ćemo vidjeti kako ovu funkciju možemo koristiti za preimenovati varijable.
 
 # dohvaćamo imena stupaca
 colnames(podaci) %>%
-# specificiramo stupce na kojima želimo izvršiti zamjenu
-str_replace(., pattern = '(moralFoundations)(01|07|12|17|23|28)',
-                     replacement = '\\1\\2_care') %>%
-# ovo je samo radi prikazivanja svih MFQ pitanja
-str_subset(., 'moralFoundations') %>% print(.)
+    # specificiramo stupce na kojima želimo izvršiti zamjenu
+    str_replace(.,
+                pattern = '(moralFoundations)(01|07|12|17|23|28)',
+                replacement = '\\1\\2_care') %>%
+    # ovo je samo radi prikazivanja svih MFQ pitanja
+    str_subset(.,
+               'moralFoundations')
 
 # Vidimo da pitanja koja smo odredili sada imaju sufiks `_care`.
 
-# U `replacement` argumentu smo iskoristili mogućnost referenciranja koju nam nudi grupiranje znakova u regularnim izrazima. Počevši s lijeva, svaku grupu definiranu pomoću `(...)` možemo dohvatiti pomoću `\\n`, gdje `n` označava redni broj grupe.
+# U `replacement` argumentu smo iskoristili mogućnost referenciranja koju nam
+# nudi grupiranje znakova u regularnim izrazima. Počevši s lijeva, svaku
+# grupu definiranu pomoću `(...)` možemo dohvatiti pomoću `\\n`, gdje `n`
+# označava redni broj grupe.
 
-# Dakle, u gornjem primjeru se pri izvršavanju zamjene `\\1` širi u prvu pronađenu grupu (moralFoundations), a `\\2` u drugu pronađenu grupu (01, 07, 12, 17, 23 ili 28, ovisno o tome što je u pojedinom stringu pronađeno). Time dobivamo `moralFoundations01_care`, `moralFoundations07_care` itd.
+# Dakle, u gornjem primjeru se pri izvršavanju zamjene `\\1` širi u prvu
+# pronađenu grupu (moralFoundations), a `\\2` u drugu pronađenu grupu (01,
+# 07, 12, 17, 23 ili 28, ovisno o tome što je u pojedinom stringu
+# pronađeno). Time dobivamo `moralFoundations01_care`,
+# `moralFoundations07_care` itd.
 
-# Kod ovakvog mijenjanja imena je zgodno to što nam se svaki put vraćaju imena svih stupaca - ako u imenu nekog stupca nije pronađen uzorak koji smo specificirali u `pattern`, ono ostaje netaknuto. Zbog toga, možemo napraviti lanac poziva `str_replace` pomoću pipa.
+# Kod ovakvog mijenjanja imena je zgodno to što nam se svaki put vraćaju imena
+# svih stupaca - ako u imenu nekog stupca nije pronađen uzorak koji smo
+# specificirali u `pattern`, ono ostaje netaknuto. Zbog toga, možemo
+# napraviti lanac poziva `str_replace()` pomoću takozvanog *pipe* operatora
+# `%>%`.
 
-colnames(podaci) %>%
-    str_replace(., '(moralFoundations)(01|07|12|17|23|28)', '\\1\\2_care') %>%
-    str_replace(., '(moralFoundations)(02|08|13|18|24|29)', '\\1\\2_fair') %>%
-    str_replace(., '(moralFoundations)(03|09|14|19|25|30)', '\\1\\2_loyal') %>%
-    str_replace(., '(moralFoundations)(04|10|15|20|26|31)', '\\1\\2_author') %>%
-    str_replace(., '(moralFoundations)(05|11|16|21|27|32)', '\\1\\2_sanct') %>%
-    str_replace(., '(moralFoundations)(06|22)', '\\1\\2_control') %>%
-print(.)
+# Pipe operator nam omogućuje da output funkcije s lijeve strane operatora
+# proslijedimo kao input funkciji s desne strane operatora.
 
-# Kad smo sigurni da dobivamo ono što očekujemo, samo promijenimo pipu `%>%` u `%<>%`.
+colnames(podaci) <- colnames(podaci) %>%
+    str_replace(.,
+                '(moralFoundations)(01|07|12|17|23|28)',
+                '\\1\\2_care') %>%
+    str_replace(.,
+                '(moralFoundations)(02|08|13|18|24|29)',
+                '\\1\\2_fair') %>%
+    str_replace(.,
+                '(moralFoundations)(03|09|14|19|25|30)',
+                '\\1\\2_loyal') %>%
+    str_replace(.,
+                '(moralFoundations)(04|10|15|20|26|31)',
+                '\\1\\2_author') %>%
+    str_replace(.,
+                '(moralFoundations)(05|11|16|21|27|32)',
+                '\\1\\2_sanct') %>%
+    str_replace(.,
+                '(moralFoundations)(06|22)',
+                '\\1\\2_control')
 
-colnames(podaci) %<>%
-    str_replace(., '(moralFoundations)(01|07|12|17|23|28)', '\\1\\2_care') %>%
-    str_replace(., '(moralFoundations)(02|08|13|18|24|29)', '\\1\\2_fair') %>%
-    str_replace(., '(moralFoundations)(03|09|14|19|25|30)', '\\1\\2_loyal') %>%
-    str_replace(., '(moralFoundations)(04|10|15|20|26|31)', '\\1\\2_author') %>%
-    str_replace(., '(moralFoundations)(05|11|16|21|27|32)', '\\1\\2_sanct') %>%
-    str_replace(., '(moralFoundations)(06|22)', '\\1\\2_control')
+colnames(podaci)
 
-colnames(podaci) %>% print(.)
+# Varijable u ovom setu zapravo su dosta dobro imenovane. Neke nisu dovoljno
+# jasne, ali imenovanje je sustavno, što uvelike olakšava baratnje podacima.
 
-# Varijable u ovom setu zapravo su dosta dobro imenovane. Neke nisu dovoljno jasne, ali imenovanje je sustavno, što uvelike olakšava baratnje podacima.
-
-# Nekad (kad radite s podacima sa Survey Monkeyja, recimo) vjerojatno nećete imati toliko jasne slučajeve. Na primjer, ime varijable moglo bi biti `1. Molimo Vas, odaberite vaš ekonomski status`. Takva imena su pakao. Kad bismo tako imenovanu varijablu ubacili u R, dobili bismo nešto ružno.
+# Nekad (kad radite s podacima sa Survey Monkeyja, recimo) vjerojatno nećete
+# imati toliko jasne slučajeve. Na primjer, ime varijable moglo bi biti `1.
+# Molimo Vas, odaberite vaš ekonomski status`. Takva imena su pakao. Kad bismo
+# tako imenovanu varijablu ubacili u R, dobili bismo nešto ružno.
 
 ruzno <- data.frame('1. Molimo Vas, odaberite vaš ekonomski status:' = 1:5)
-print(ruzno)
 
-# Svaki razmak postao je točka, zarez i dvotočka također su postali točke, a imenu varijable dodan je prefiks `X` (jer ime varijable ne može započinjati brojem!).
+# Svaki razmak postao je točka, zarez i dvotočka također su postali točke, a
+# imenu varijable dodan je prefiks `X` (jer ime varijable ne može započinjati
+# brojem!).
 
-# Možemo pozvati funkciju `clean_names` iz paketa `janitor`, koja će od ružnih imena napraviti nešto ljepša.
+# Možemo pozvati funkciju `clean_names()` iz paketa `janitor`, koja će od
+# ružnih imena napraviti nešto ljepša. Paket `janitor` nismo učitali ranije, ali
+# možemo koristiti funkcije iz njega tako da prije imena funkcije upišemo ime
+# paketa, a ime paketa i funkcije odvojimo koristeći `::`.
 
-lijepo <- clean_names(ruzno)
-print(lijepo)
+lijepo <- janitor::clean_names(ruzno)
 
-# Ovisno o konkretnom imenu, ova će funkcija biti manje ili više korisna. Recimo, ako je potrebno u potpunosti preimenovati varijablu u nešto smisleno, nema druge nego ručno.
-#
-# Ipak, isplati se pozvati `clean_names` jer može uvelike olakšati automatizirano preimenovanje.
+lijepo
+
+# Ovisno o konkretnom imenu, ova će funkcija biti manje ili više korisna.
+# Recimo, ako je potrebno u potpunosti preimenovati varijablu u nešto smisleno,
+# nema druge nego ručno.
+
+# Ipak, isplati se pozvati `clean_names()` jer može uvelike olakšati
+# automatizirano preimenovanje.
 
 # Dodat ćemo još 2 ružna stupca u `data.frame` `ruzno`.
 
-ruzno %<>% data.frame(., '2. Koliko sam vina ja popio?' = 15:19,
-                    '3. Je li vaše ludo srce biralo?' = F)
-print(ruzno)
+ruzno <- ruzno %>% data.frame(.,
+                              '2. Koliko imate godina?' = 15:19,
+                              '3. Jeste lie zadovoljni trenutnim poslom?' = F)
+
+ruzno
 
 # Vidimo da su i upitnici pretvoreni u točke.
 
-# Recimo da hoćemo svako ime svesti na format `[broj pitanja]_[prva riječ]`. Ako dopustimo R-u da obavi svoju masovnu konverziju, pa takva imena pretvaramo, mogli bismo imati problema (ili više nepotrebne patnje) sa specificiranjem obrasca koji želimo odbaciti.
+# Recimo da hoćemo svako ime svesti na format `[broj pitanja]_[prva riječ]`. Ako
+# dopustimo R-u da obavi svoju masovnu konverziju, pa takva imena pretvaramo,
+# mogli bismo imati problema (ili više nepotrebne patnje) sa specificiranjem
+# obrasca koji želimo odbaciti.
 
-# Ponovno ćemo pozvati `clean_names`:
+# Ponovno ćemo pozvati `clean_names()`:
 
-lijepo <- clean_names(ruzno)
-print(lijepo)
+lijepo <- janitor::clean_names(ruzno)
 
-# Ova imena su puno sustavnija, zbog čega je lakše napisati neki obrazac znakova koji želimo zadržati. Za primjer, svest ćemo imena varijabli na format `[broj pitanja]_[prva riječ]`.
+lijepo
 
-colnames(lijepo) %<>%
-str_replace(., '^x(\\d_[[:lower:]]+).*', '\\1')
-print(lijepo)
+# Ova imena su nešto sustavnija, zbog čega je lakše napisati neki obrazac znakova
+# koji želimo zadržati. Za primjer, svest ćemo imena varijabli na format `[broj
+# pitanja]_[prva riječ]`.
 
-#
+colnames(lijepo) <- colnames(lijepo) %>%
+    str_replace(.,
+                '^x(\\d_[[:lower:]]+).*',
+                '\\1')
+
 # ### Obrnuto kodiranje varijabli
 
 # Neka od pitanja u ovom upitnik potrebno je obrnuto kodirati. To možemo učiniti pomoću funkcije `reverse.code` iz `psych` paketa. Ta funkcija ima dva obavezna argumenta: `keys`, koji je vektor brojki `1` i `-1`, te `items`, što su čestice koje treba rekodirati.
