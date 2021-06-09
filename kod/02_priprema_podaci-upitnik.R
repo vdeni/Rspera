@@ -267,157 +267,159 @@ str_detect(string = c('kobilaaaa', 'maajka', 'celer'),
 # sva tri zadana stringa sadrže nula ('celer') ili više ('kobilaaaa', 'maajka')
 # ponavljanja znaka 'a', `str_detect()` vraća `TRUE` za sve zadane stringove.
 
-# `+` označava **jedno (1) ili više** ponavljanja prethodnog znaka/klase
+# `+` označava *jedno (1) ili više* ponavljanja prethodnog znaka/klase
 # znakova/grupe znakova.
 
-# Da vidimo što će nam vratiti funkcija `str_extract_all` koja prima iste argumente kao i `str_detect`, a vraća sve pronađene `patterne`.
+# Da vidimo što će nam vratiti funkcija `str_extract_all()` koja prima iste
+# argumente kao i `str_detect()`, a vraća sve pronađene `patterne`.
 
-stringr::str_extract_all(string = qc(kobilaaaa, maajka, celer), pattern = 'a+') %>% print(.)
+str_extract_all(string = c('kobilaaaa', 'maajka', 'celer'),
+                pattern = 'a+')
 
-# Postoji i funkcija `str_extract` koja vraća **samo prvi** pronađeni uzorak.
+# Postoji i funkcija `str_extract()` koja vraća *samo prvi* pronađeni uzorak.
 
-stringr::str_extract(qc(kobilaaaa, maajka, celer), 'a+') %>% print(.)
+str_extract(c('kobilaaaa', 'maajka', 'celer'),
+            'a+')
 
-# Također, možemo vidjeti da `str_detect` više ne vraća `TRUE` za posljednju riječ.
+# Također, možemo vidjeti da `str_detect()` više ne vraća `TRUE` za posljednju
+# riječ.
 
-stringr::str_detect(qc(kobilaaaa, maajka, celer), 'a+') %>% print(.)
+str_detect(c('kobilaaaa', 'maajka', 'celer'),
+           'a+')
 
-#
-# #### ?
+# Ako želimo provjeriti javlja li se neki znak 0 ili 1 put, možemo koristiti
+# `?`.
 
-# Upitnik označavao **0 ili jedno (1)** ponavljanje.
+c('kobilaaaa', 'maajka', 'celer') %>%
+    str_extract_all(.,
+                    'a?')
 
-qc(kobilaaaa, maajka, celer) %>%
-stringr::str_extract_all(., 'a?') %>%
-print(.)
+# Ako želimo provjeriti javlja li se neki znak točno određen broj puta, možemo
+# koristiti `{n,m}` sintaksu.
 
-#
-# #### {n,m}
-
-# Ova sintaksa nam omogućava da specificiramo koliko ponavljanja želimo. Postoje tri valjane kombinacije:
-#
+# Ova sintaksa nam omogućava da specificiramo koliko ponavljanja želimo. Postoje
+# tri valjane kombinacije:
 # - `{n,m}` znači od `n` do `m`
 # - `{n,}` znači `n` ili više
 # - `{n}` znači točno `n`
-#
-# `{,m}` **nije valjan** regularni izraz! Također, bitno je da nema razmaka između `n` ili `m` i zareza.
+# `{,m}` *nije valjan* regularni izraz! Također, bitno je da nema razmaka između
+# `n` ili `m` i zareza.
 
 # Vratit ćemo se na početni primjer.
 
-qc(string, striing, striiing, striiiiiiiiiiiiiiiiing) %>%
-stringr::str_extract_all(., 'i{2,5}') %>% print(.)
+c('string', 'striing', 'striiing', 'striiiiiiiiiiiiiiiiing') %>%
+    str_extract_all(.,
+                    'i{2,5}')
 
-qc(string, striing, striiing, striiiiiiiiiiiiiiiiing) %>%
-stringr::str_extract_all(., 'i{3,}') %>% print(.)
+c('string', 'striing', 'striiing', 'striiiiiiiiiiiiiiiiing') %>%
+    str_extract_all(.,
+                    'i{3,}')
 
-qc(string, striing, striiing, striiiiiiiiiiiiiiiiing) %>%
-stringr::str_extract_all(., 'i{17}') %>% print(.)
+c('string', 'striing', 'striiing', 'striiiiiiiiiiiiiiiiing') %>%
+    str_extract_all(.,
+                    'i{17}')
 
+##### Klase znakova
+
+# Pretraživanja koja smo dosad vidjeli su jednostavna i jako umjetna. U stvarnim
+# primjenama uglavnom nećemo pokušavati uhvatiti jedno slovo, nego znakove
+# određenog tipa (kao što su brojke) ili određene skupine znakova (npr. brojeve
+# 1, 5 ili 7). U te svrhe, koristimo *klase znakova*.
 #
-# ### Klase znakova
+# NB: Klase znakova predstavljaju više mogućih znakova, ali *samo jedno
+# mjesto*.
 
-# Pretraživanja koja smo dosad vidjeli su jednostavna i jako umjetna. U stvarnim primjenama uglavnom nećemo pokušavati uhvatiti jedno slovo, nego znakove određenog tipa (kao što su brojke) ili određene skupine znakova (npr. brojeve 1, 7 ili 5). U te svrhe, koristimo **klase znakova**.
-#
-# NB: Klase znakova predstavljaju više mogućih znakova, ali **samo jedno mjesto**.
+# Napravit ćemo mali `data.frame` koji se sastoji od dva stupca koja sadrže
+# stringove.
 
-# Napravit ćemo mali `data.frame` koji se sastoji od dva stupca koja sadrže stringove.
+registracije <- data.frame('mjesta' = c('Slavonski Brod', 'BJELOVAR',
+                                        'Cista Provo', 'Banova Jaruga'),
+                           'tablice' = c('SB1152KF', 'BJ302LD',
+                                         'CP999LO', 'BN2001KA'))
 
-# ne možemo koristiti qc za mjesta zbog razmaka
-data.frame(mjesta = c('Slavonski Brod', 'BJELOVAR', 'Cista Provo', 'Banova Jaruga'),
-           tablice = qc(SB1152KF, BJ302LD, CP999LO, BN2001KA)) -> registracije
-
-# Za početak, pokušat ćemo pronaći sva mjesta čija se imena sastoje od dvije riječi (to znači da ćemo isključiti BJELOVAR `:(`). Vidimo da sva mjesta koja se sastoje od dvije riječi imaju sljedeći uzorak: `[veliko slovo][nekoliko malih slova][razmak][veliko slovo][nekoliko malih slova]`. Koristeći regexe, možemo napraviti sljedeće:
-
-print(registracije)
+# Za početak, pokušat ćemo pronaći sva mjesta čija se imena sastoje od dvije
+# riječi (to znači da ćemo isključiti BJELOVAR). Vidimo da sva mjesta koja
+# se sastoje od dvije riječi imaju sljedeći uzorak: `[veliko slovo][nekoliko
+# malih slova][razmak][veliko slovo][nekoliko malih slova]`. Koristeći regexe,
+# možemo napraviti sljedeće:
 
 registracije$mjesta %>%
-stringr::str_detect(., '^[[:upper:]][[:lower:]]+\\s[[:upper:]][[:lower:]]+$')
+    str_detect(.,
+               '^[[:upper:]][[:lower:]]+\\s[[:upper:]][[:lower:]]+$')
 
-# `^` (eng. *caret*) je meta-znak koji označava **početak stringa**.
+# `^` (eng. *caret*) je meta-znak koji označava *početak stringa*.
 
-# `[[:upper:]]` i `[[:lower:]]` su klase koje označavaju velika odnosno mala slova.
+# `[[:upper:]]` i `[[:lower:]]` su klase koje označavaju velika odnosno mala
+# slova.
 
 # `\\s` označava razmak (ostavljanje praznog mjesta također funkcionira). 
 
-# Dakle, obrazac koji tražimo mora počinjati s velikim slovom kojem slijedi jedno ili više malih slova.
-#
-# Drugi važan meta-znak je `$`, koji označava **kraj stringa**.
+# Dakle, obrazac koji tražimo mora počinjati s velikim slovom kojem slijedi
+# jedno ili više malih slova.
 
-# NB: Ako želimo tražiti same meta-znakove (npr. u `$1551`), ispred njih moramo staviti `\\` (backslash x 2). Taj čin se zove *escaping*.
+# Drugi važan meta-znak je `$`, koji označava *kraj stringa*.
 
-# qc ni ovdje ne funkcionira
+# NB: Ako želimo tražiti same meta-znakove (npr. u `$1551`), ispred njih moramo
+# staviti `\\` (backslash x 2). Taj čin se zove *escaping*.
+
 c('$alaj', '€broj') %>%
-stringr::str_detect(., '\\$')
+    str_detect(.,
+               '\\$')
 
-# Koristeći uglate zagrade, možemo sami definirati klasu znakova koja je prihvatljiva na nekom mjestu. Na primjer, možemo tražiti sva mjesta koja imaju dvije riječi i čija prva riječ počinje slovom B (velikim!) ili S (također!). Ovdje ćemo koristiti `str_subset`, koja vraća stringove koji sadrže zadani obrazac.
+# Koristeći uglate zagrade, možemo sami definirati klasu znakova koja je
+# prihvatljiva na nekom mjestu. Na primjer, možemo tražiti sva mjesta koja imaju
+# dvije riječi i čija prva riječ počinje slovom B (velikim!) ili S (također!).
+# Ovdje ćemo koristiti `str_subset`, koja vraća stringove koji sadrže zadani
+# obrazac.
 
 registracije$mjesta %>%
-stringr::str_subset(., '^[SB][[:lower:]]+\\s[[:upper:]][[:lower:]]+')
+    str_subset(.,
+               '^[SB][[:lower:]]+\\s[[:upper:]][[:lower:]]+')
 
-# Možemo definirati i custom klasu znakova koji se **ne smiju** nalaziti na nekom mjestu. To radimo tako da na početak svoje klase stavimo znak `^` (`[^...]`).
-#
-# NB: Ovdje treba obratiti pažnju na pozicioniranje znaka `-`. On mora dolaziti **odmah nakon otvarajuće** zagrade (ili iza `^` ako imamo negacijskju klasu) ili **neposredno prije** zatvarajuće zagrade. Pomoću znaka `-` možemo definirati raspone (npr. `0-9`), pa možemo dobiti error ili nešto neočekivano ako ga stavimo usred klase.
+# Možemo definirati i vlastitu klasu znakova koji se *ne smiju* nalaziti na nekom
+# mjestu. To radimo tako da na početak svoje klase stavimo znak `^` (`[^...]`).
 
 # Na primjer, možemo tražiti stringove koji ne počinju slovom S ili B:
 
 registracije$mjesta %>%
-stringr::str_subset(., '^[^SB].*')
+    str_subset(.,
+               '^[^SB].*')
 
-# Točka je poseban znak u regularnim izrazima, a označava **bilo koji znak** (osim novog reda, što se u R-u označava s `\\n`). Budući da označava bilo što, `.` se zove *wildcard*.
+# Točka je poseban znak u regularnim izrazima, a označava *bilo koji znak* (osim
+# novog reda, što se u R-u označava s `\\n`). Budući da označava bilo što, `.`
+# se zove *wildcard*.
 
-# Klasa znakova ima razmjerno puno, pa ćemo spomenuti još jednu koja se često javlja. Pokušat ćemo izvući samo one registracijske oznake (`tablice`) koje imaju tri znamenke.
+# Klasa znakova ima razmjerno puno, pa ćemo spomenuti još jednu koja se često
+# javlja. Pokušat ćemo izvući samo one registracijske oznake (`tablice`) koje
+# imaju tri znamenke.
 
 registracije$tablice %>%
-stringr::str_subset(., '[[:upper:]]{2}\\d{3}[[:upper:]]')
+    str_subset(.,
+               '[[:upper:]]{2}\\d{3}[[:upper:]]')
 
 # `\\d`, dakle, označava znamenke.
 
 # Zasad ćemo proći još samo kroz grupe znakova.
 
-#
-# ### Grupe znakova
+##### Grupe znakova
 
-# Znakove možemo grupirati koristeći obične zagrade (`(...)`). Grupe spajaju znakove u jednu cjelinu. To nam, primjerice, omogućuje da ponavljajuće uzorke lako kvantificiramo.
-#
-# Na primjer, zamislimo da želimo izvući određene vrste smjehova iz nekih stringova.
+# Znakove možemo grupirati koristeći obične zagrade (`(...)`). Grupe spajaju
+# znakove u jednu cjelinu. To nam, primjerice, omogućuje da ponavljajuće uzorke
+# lako kvantificiramo. Na primjer, zamislimo da želimo izvući određene vrste
+# smjehova iz nekih stringova.
 
-qc(hehehe, hehahohohehe, hahahahihi) %>%
-stringr::str_extract_all(., '(ha|he){2}') %>%
-print(.)
+c('hehehe', 'hehahohohehe', 'hahahahihi') %>%
+    str_extract_all(.,
+                    '(ha|he){2}')
 
-# Ovdje smo iskoristili i znak `|` (kod mene se nalazi na `AltGr-W` i zove se *pipe*), koji označava alternaciju, odnosno logičko ILI. Dakle, tražimo dva ponavljanja stringa `ha ili he`.
-#
-# NB: Ne stavljati razmake oko alternatora jer će se to tumačiti kao razmak koji treba tražiti u stringu!
+# Ovdje smo iskoristili i znak `|` (kod mene se nalazi na `AltGr-W` i zove se
+# *pipe*), koji označava alternaciju, odnosno logičko ILI. Dakle, tražimo dva
+# ponavljanja stringa `ha ili he`.
 
-#
-# ### Vježbica
+# NB: Ne stavljati razmake oko alternatora jer će se to tumačiti kao razmak koji
+# treba tražiti u stringu!
 
-# Radili smo longitudinalno istraživanje s dvije točke mjerenja. Svojim dragim sudionicima napisali smo jednostavnu formulu za stvaranje šifre: prva dva slova imena majke, posljednje dvije znamenke mobitela i prva dva slova imena rodnog grada.
-#
-# Sve smo ih stavili u format pogodan za nekakvo analiziranje longitudinalnih podataka, zbog čega se šifre sudionika iz obje točke mjerenja nalaze u jednom stupcu.
-
-# Ovo su šifre naša 4 sudionika:
-
-sifre <- qc(BR83ZA, KA15ZA, RA75BJ, PE43SP,
-            BR83ZG, ZA15KA, RA75BJ, PE43ST)
-
-# Koristeći moći opažanja, uočili smo da:
-#
-# - su neki sudionici u drugoj točki mjerenja umjesto prva dva slova imena rodnog grada pisali registarsku oznaku rodnog grada
-# - je jedan sudionik zamijenio mjesto prvih slova imena majke i prvih slova imena rodnog grada.
-
-# Pokušajte (i) izvući sve sudionike čiji je rodni grad Zagreb ili Split te (ii) izvući sve šifre sudionika koji je zamijenio redoslijed imena majke i slova rodnog grada. Napišite potpuni regularni izraz (dakle, nema švercanja s `.*`)!
-
-sifre %>%
-stringr::str_subset(., '\\w{2}\\d+(ZG|ST|ZA|SP)')
-
-sifre %>%
-stringr::str_subset(., '(ZA|KA)\\d{2}(ZA|KA)')
-
-# Time završavamo digresivne tokove i bacamo se na borbu s podacima.
-
-#
-# ## Nastavak pripreme podataka
+##### Nastavak pripreme podataka
 
 # Zasad smo pogledali strukturu podatka (`str`), kako izgledaju sirovi podaci (`head` i `tail`) te neke statističke sažetke (`describe` i `summary`, `skim`).
 #
@@ -443,27 +445,27 @@ str(podaci)
 # (a) ćemo riješiti koristeći `colnames` i `select`.
 
 podaci %>%
-dplyr::select(., dplyr::starts_with('pi'), -pi_age) %>%
+select(., starts_with('pi'), -pi_age) %>%
 colnames(.)
 
 # Vidimo da ciljamo ispravne stupce. Sad možemo eksperimentirati s `mutate_at`.
 
 podaci %>%
-dplyr::mutate_at(.,
+mutate_at(.,
                 # varijable koje želimo zahvatiti treba omotati u
                 # funkciju vars; ona prima iste pomoćne funkcije kao
                 # i select
-                .vars = dplyr::vars(dplyr::starts_with('pi'), -pi_age),
+                .vars = vars(starts_with('pi'), -pi_age),
                 .fun = as.factor) %>%
 # ovaj dio je samo radi prikazivanja
-dplyr::select(., starts_with('pi')) %>%
+select(., starts_with('pi')) %>%
 str(.)
 
 # Zadovoljni smo outputom, pa možemo malko modificirati kod i spremiti promjene.
 
 podaci %<>%
-dplyr::mutate_at(.,
-                .vars = dplyr::vars(dplyr::starts_with('pi'), -pi_age),
+mutate_at(.,
+                .vars = vars(starts_with('pi'), -pi_age),
                 .fun = as.factor)
 
 str(podaci)
@@ -471,7 +473,7 @@ str(podaci)
 # Ako sad pozovemo `summary`, dobit ćemo korisnije rezultate.
 
 podaci %>%
-dplyr::select(., dplyr::starts_with('pi_'), -pi_age) %>%
+select(., starts_with('pi_'), -pi_age) %>%
 summary(.)
 
 # Gledajući output ove funkcije, primjećujemo da su pojedine vrijednosti prilično dugačke (npr. Some professional diploma, no degree).
@@ -482,7 +484,7 @@ podaci$pi_education %>% levels(.) %>% dput(.)
 
 podaci$pi_education %>%
 head(., 10) %T>% print(.) %>%
-forcats::fct_recode(., 'elem-sch' = "Elementary School", 'hi-sch' = "High school",
+fct_recode(., 'elem-sch' = "Elementary School", 'hi-sch' = "High school",
                     'masters' = "Master's degree", 'phd' = "PhD or higher", 
                     'prof-dip' = "Some professional diploma, no degree", 
                     'bac' = "The baccalaureate") %>% print(.)
@@ -492,7 +494,7 @@ forcats::fct_recode(., 'elem-sch' = "Elementary School", 'hi-sch' = "High school
 # Sad kad smo zadovoljni outputom, možemo maknuti nepotrebne dijelove i upisati promjenu.
 
 podaci$pi_education %<>%
-forcats::fct_recode(., 'elem-sch' = "Elementary School", 'hi-sch' = "High school",
+fct_recode(., 'elem-sch' = "Elementary School", 'hi-sch' = "High school",
                     'masters' = "Master's degree", 'phd' = "PhD or higher", 
                     'prof-dip' = "Some professional diploma, no degree", 
                     'bac' = "The baccalaureate")
@@ -509,7 +511,7 @@ levels(podaci$pi_education)
 podaci$pi_income %>% levels(.) %>% dput(.)
 
 podaci$pi_income %<>%
-forcats::fct_recode(., 'avg' = "About the average",
+fct_recode(., 'avg' = "About the average",
                     'avg++' = "Much above the average",
                     'avg--' = "Much below the average", 
                     'avg+' = "Somewhat above the average",
@@ -518,13 +520,13 @@ forcats::fct_recode(., 'avg' = "About the average",
 # Ovdje možemo primijetiti da je redoslijed razina podosta besmislen, tako da ćemo ih izvrtiti tako da idu od najniže do najviše. To ćemo učiniti pomoću funkcije `fct_relevel`.
 
 podaci$pi_income %>%
-forcats::fct_relevel(., 'avg--', 'avg-', 'avg', 'avg+', 'avg++') %>%
+fct_relevel(., 'avg--', 'avg-', 'avg', 'avg+', 'avg++') %>%
 # još ćemo faktor pretvoriti u ordered
 factor(., ordered = T) %>%
 tail(., 10) %>% print(.)
 
 podaci$pi_income %<>%
-forcats::fct_relevel(., 'avg--', 'avg-', 'avg', 'avg+', 'avg++') %>%
+fct_relevel(., 'avg--', 'avg-', 'avg', 'avg+', 'avg++') %>%
 factor(., ordered = T)
 
 str(podaci$pi_income)
@@ -542,7 +544,7 @@ podaci$pi_nationality %>% head(.)
 
 # Za početak, iskoristit ćemo funkciju `tolower` kako bismo sve stringove pretvorili u mala slova (tako da ne moramo paziti na to da su "american" i "American" različiti unosi) te funkciju `str_trim`, koja će ukloniti razmake s početka i kraja stringova (jer je moguće da je netko unio "American", a netko "American ").
 
-podaci$pi_nationality %<>% tolower(.) %>% stringr::str_trim(.)
+podaci$pi_nationality %<>% tolower(.) %>% str_trim(.)
 
 head(podaci$pi_nationality)
 
@@ -563,7 +565,7 @@ table(podaci$pi_nationality) %>% sort(., decreasing = T)
 
 podaci$pi_nationality %>%
 # case_when ovdje moramo obaviti u {} jer inače dobijemo error
-{dplyr::case_when(stringr::str_detect(., 'usa?|american|united states.*|\\w+ americ') ~ 'american',
+{case_when(str_detect(., 'usa?|american|united states.*|\\w+ americ') ~ 'american',
            str_detect(., 'dutch|french') ~ 'fr-nl',
            str_detect(., 'seychelles|turkish|white') ~ 'other',
            # akciju u svim nespecificiranim slučajevima određujemo
@@ -573,7 +575,7 @@ podaci$pi_nationality %>%
            TRUE ~ .)} %>% table(.)
 
 podaci$pi_nationality %<>%
-{dplyr::case_when(stringr::str_detect(., 'usa?|american|united states.*|\\w+ americ') ~ 'american',
+{case_when(str_detect(., 'usa?|american|united states.*|\\w+ americ') ~ 'american',
            str_detect(., 'dutch|french') ~ 'fr-nl',
            str_detect(., 'seychelles|turkish|white') ~ 'other',
            TRUE ~ .)}
@@ -586,15 +588,15 @@ podaci$pi_nationality %<>%
 # Ako želimo promijeniti imena manjeg broja varijabli, možemo koristiti funkciju `rename`. Na primjer, varijable `charitableBehavior01` i `charitableBehavior02` ne govore ništa o tome što su. Jedna je namjera doniranja novca, a druga namjera doniranja vremena. Stoga, preimenovat ćemo ih u `donationMoney` i `donationTime`.
 
 podaci %>%
-dplyr::select(10:11) %>%
+select(10:11) %>%
 colnames(.)
 
 podaci %<>%
-dplyr::rename(., donationMoney = charitableBehavior01,
+rename(., donationMoney = charitableBehavior01,
       donationTime = charitableBehavior02)
 
 podaci %>%
-dplyr::select(10:11) %>%
+select(10:11) %>%
 colnames(.)
 
 # Ako trebamo preimenovati veći broj varijabli i ako smo te sreće da njihova imena možemo uhvatiti regularnim izrazima, možemo koristiti `str_replace`.
@@ -604,17 +606,17 @@ colnames(.)
 # Preimenovat ćemo varijable tako da na kraj imena svake od njih dodamo oznaku faktora kojoj pripada. Za to ćemo koristiti funkciju `str_replace`, koja nam omogućuje da neki obrazac definiran regexom zamijenimo nekim drugim stringom.
 
 qc(orahovica, orašar) %>%
-stringr::str_replace(., 'ora(h|š)', 'bor')
+str_replace(., 'ora(h|š)', 'bor')
 
 # Sad ćemo vidjeti kako ovu funkciju možemo koristiti za preimenovati varijable.
 
 # dohvaćamo imena stupaca
 colnames(podaci) %>%
 # specificiramo stupce na kojima želimo izvršiti zamjenu
-stringr::str_replace(., pattern = '(moralFoundations)(01|07|12|17|23|28)',
+str_replace(., pattern = '(moralFoundations)(01|07|12|17|23|28)',
                      replacement = '\\1\\2_care') %>%
 # ovo je samo radi prikazivanja svih MFQ pitanja
-stringr::str_subset(., 'moralFoundations') %>% print(.)
+str_subset(., 'moralFoundations') %>% print(.)
 
 # Vidimo da pitanja koja smo odredili sada imaju sufiks `_care`.
 
@@ -625,7 +627,7 @@ stringr::str_subset(., 'moralFoundations') %>% print(.)
 # Kod ovakvog mijenjanja imena je zgodno to što nam se svaki put vraćaju imena svih stupaca - ako u imenu nekog stupca nije pronađen uzorak koji smo specificirali u `pattern`, ono ostaje netaknuto. Zbog toga, možemo napraviti lanac poziva `str_replace` pomoću pipa.
 
 colnames(podaci) %>%
-    stringr::str_replace(., '(moralFoundations)(01|07|12|17|23|28)', '\\1\\2_care') %>%
+    str_replace(., '(moralFoundations)(01|07|12|17|23|28)', '\\1\\2_care') %>%
     str_replace(., '(moralFoundations)(02|08|13|18|24|29)', '\\1\\2_fair') %>%
     str_replace(., '(moralFoundations)(03|09|14|19|25|30)', '\\1\\2_loyal') %>%
     str_replace(., '(moralFoundations)(04|10|15|20|26|31)', '\\1\\2_author') %>%
@@ -656,7 +658,7 @@ print(ruzno)
 
 # Možemo pozvati funkciju `clean_names` iz paketa `janitor`, koja će od ružnih imena napraviti nešto ljepša.
 
-lijepo <- janitor::clean_names(ruzno)
+lijepo <- clean_names(ruzno)
 print(lijepo)
 
 # Ovisno o konkretnom imenu, ova će funkcija biti manje ili više korisna. Recimo, ako je potrebno u potpunosti preimenovati varijablu u nešto smisleno, nema druge nego ručno.
@@ -675,13 +677,13 @@ print(ruzno)
 
 # Ponovno ćemo pozvati `clean_names`:
 
-lijepo <- janitor::clean_names(ruzno)
+lijepo <- clean_names(ruzno)
 print(lijepo)
 
 # Ova imena su puno sustavnija, zbog čega je lakše napisati neki obrazac znakova koji želimo zadržati. Za primjer, svest ćemo imena varijabli na format `[broj pitanja]_[prva riječ]`.
 
 colnames(lijepo) %<>%
-stringr::str_replace(., '^x(\\d_[[:lower:]]+).*', '\\1')
+str_replace(., '^x(\\d_[[:lower:]]+).*', '\\1')
 print(lijepo)
 
 #
@@ -692,9 +694,9 @@ print(lijepo)
 # Za primjer, rekodirat ćemo 3. i 4. pitanje skale `moralIdentityInternalization`.
 
 podaci %>%
-dplyr::select(contains('Internal')) %>%
+select(contains('Internal')) %>%
 head(.) %T>% print(.) %>%
-{psych::reverse.code(keys = c(1, 1, -1, -1, 1),
+{reverse.code(keys = c(1, 1, -1, -1, 1),
                     items = .,
                     # zadajemo maksimum i minimum skale
                     # jer inače određuje prema vrijednostima
@@ -708,10 +710,10 @@ str(.) %>% head(.)
 
 podaci %<>%
 # contains smo promijenili u matches
-dplyr::select(matches('Internal.*(03|04)$')) %>%
+select(matches('Internal.*(03|04)$')) %>%
 # u keys ostavljamo samo onoliko -1 koliko
 # imamo varijabli
-{psych::reverse.code(keys = c(-1, -1),
+{reverse.code(keys = c(-1, -1),
                     items = .,
                     mini = 0, maxi = 7)} %>%
 # reverse.code nam vraća matrix, pa ga pretvaramo
@@ -719,7 +721,7 @@ dplyr::select(matches('Internal.*(03|04)$')) %>%
 as.data.frame(.) %$%
 # otkrivamo imena varijabli kako bismo ih mogli
 # koristiti direktno; tibble je dio tidyversea
-tibble::add_column(podaci,
+add_column(podaci,
                    moralIdentityInternalization03_rec =
                    # ime varijable moramo staviti u `` (backticks)
                    # jer R inače baca error zbog - na kraju imena
@@ -743,14 +745,14 @@ colnames(podaci) %>% print(.)
 
 podaci$mf_CareHarm <- NULL
 
-podaci %>% dplyr::select(., starts_with('mf_')) %>% str(.)
+podaci %>% select(., starts_with('mf_')) %>% str(.)
 
 # Drugi je prepisivanje (u smislu *overwrite*) varijable koja drži `data.frame` `data.frameom` koji sadrži sve varijable osim te koju želimo ukloniti. To možemo učiniti pomoću funkcije `select` i negacijskog operatora `-`.
 
 podaci %<>%
-dplyr::select(-mf_FairnessCheating)
+select(-mf_FairnessCheating)
 
-podaci %>% dplyr::select(., starts_with('mf_')) %>% str(.)
+podaci %>% select(., starts_with('mf_')) %>% str(.)
 
 #
 # ### Stvaranje nove varijable pomoću `mutate`
@@ -764,37 +766,37 @@ podaci %>%
 # kao što i samo ime kaže. funkciju primjenjujemo na varijable
 # koje završavaju s 'care', što možemo napraviti jer smo bili
 # mudri i smisleno i sustavno imenovali varijable
-dplyr::mutate(.,
-             mf_CareHarm = rowMeans(dplyr::select(.,
-                                                  dplyr::ends_with('care'))),
-             mf_FairnessCheating = rowMeans(dplyr::select(.,
-                                                          dplyr::ends_with('fair')))) %>%
+mutate(.,
+             mf_CareHarm = rowMeans(select(.,
+                                                  ends_with('care'))),
+             mf_FairnessCheating = rowMeans(select(.,
+                                                          ends_with('fair')))) %>%
 # kad koristimo select, redoslijed kojim unosimo varijable u funkciju
 # određuje redoslijed varijabli nakon odabira stupaca. stoga, budući da
 # mutate vraća data.frame, možemo iskoristiti select da nove varijable
 # preselimo do njima srodnih. primijetit ćemo da u selectu možemo
 # kombinirati numeričke indekse i imena varijabli; koristimo
 # everything() za dodavanje svih preostalih varijabli
-dplyr::select(., 1:mf_SanctityDegradation, mf_CareHarm, mf_FairnessCheating,
-      dplyr::everything()) %>% str(.)
+select(., 1:mf_SanctityDegradation, mf_CareHarm, mf_FairnessCheating,
+      everything()) %>% str(.)
 
 # Vidimo da dobivamo što smo i htjeli, pa spremamo promjene.
 
 podaci %<>%
-dplyr::mutate(.,
-              mf_CareHarm = rowMeans(dplyr::select(.,
-                                                   dplyr::ends_with('care'))),
-              mf_FairnessCheating = rowMeans(dplyr::select(.,
-                                                    dplyr::ends_with('fair')))) %>%
-dplyr::select(., 1:mf_SanctityDegradation, mf_CareHarm, mf_FairnessCheating,
-              dplyr::everything())
+mutate(.,
+              mf_CareHarm = rowMeans(select(.,
+                                                   ends_with('care'))),
+              mf_FairnessCheating = rowMeans(select(.,
+                                                    ends_with('fair')))) %>%
+select(., 1:mf_SanctityDegradation, mf_CareHarm, mf_FairnessCheating,
+              everything())
 
 #
 # ## Long i wide formati podataka
 
-# Podaci kojima cijelo vrijeme baratamo nalaze se u **wide** formatu - svaki red predstavlja jedan *case* (u našem slučaju sudionika), a svaki stupac predstavlja jednu varijablu. Često, to je format s kojim želimo raditi.
+# Podaci kojima cijelo vrijeme baratamo nalaze se u *wide* formatu - svaki red predstavlja jedan *case* (u našem slučaju sudionika), a svaki stupac predstavlja jednu varijablu. Često, to je format s kojim želimo raditi.
 
-# Ipak, ponekad nam je zgodno podatke prebaciti u **long** format, u kojem svaki *case* zauzima nekoliko redova. Takav format je potreban za, recimo, multilevel modeliranje u R-u.
+# Ipak, ponekad nam je zgodno podatke prebaciti u *long* format, u kojem svaki *case* zauzima nekoliko redova. Takav format je potreban za, recimo, multilevel modeliranje u R-u.
 
 # Za potrebe demonstracije prebacivanja iz jednog formata u drugi, napravit ćemo novi `data.frame`, koji sadrži podskup varijabli i *caseova* iz `data.framea` `podaci`.
 
@@ -802,10 +804,10 @@ podaci %>%
 # slice nam omogućuje da biramo
 # redove prema indeksu. uzet ćemo
 # prvih 10 sudionika
-dplyr::slice(., 1:10) %>%
-dplyr::select(pi_gender, starts_with('descriptive')) %>%
+slice(., 1:10) %>%
+select(pi_gender, starts_with('descriptive')) %>%
 # dodajemo eksplicitni indeks za svakog sudionika
-tibble::add_column(., sub_index = 1:nrow(.)) ->
+add_column(., sub_index = 1:nrow(.)) ->
 podaci_wide
 
 podaci_wide
@@ -815,7 +817,7 @@ podaci_wide
 # `gatheru` moramo dati neku tablicu s podacima (dakle, recimo, `data.frame`), odrediti ime varijable koja će služiti kao `key`, ime varijable koja će služiti kao `value`, te stupce koje želimo svesti na `key` - `value` format.
 
 podaci_wide %>%
-tidyr::gather(., key = 'pitanje', value = 'odgovor',
+gather(., key = 'pitanje', value = 'odgovor',
              descriptiveSocialNorms01:descriptiveSocialNorms04) ->
 podaci_long
 
@@ -828,412 +830,5 @@ podaci_long
 # `spread` uzima jedinstvene vrijednosti iz varijable navedene kao `key` i širi ih u nove varijable, koje potom puni vrijednostima zadanima pod `value`.
 
 podaci_long %>%
-tidyr::spread(., key = pitanje, value = odgovor) %>%
-dplyr::arrange(., sub_index)
-
-#
-# # Motivacijski primjeri - vizualizacija podataka
-
-# U ovom dugoočekivanom, posljednjem dijelu proći ćemo kroz par motivacijskih primjera koji pokazuju razne zgodnosti koje nam R nudi. Za početak, pogledat ćemo osnove vizualizacije podataka.
-
-# Kao što smo vidjeli u dijelu o pipama, podatke možemo vizualizirati koristeći generičku funkciju `plot`.
-
-# Za dobiti, na primjer, dijagram raspršenja, dovoljno je u `plot` proslijediti dvije numeričke varijable.
-
-podaci %>%
-dplyr::select(., mf_CareHarm, mf_FairnessCheating) %>%
-plot(.)
-
-# Histogram možemo dobiti pomoću funkcije `hist`.
-
-podaci$mf_CareHarm %>% hist(.)
-
-# A možemo dobiti i graf gustoće distribucije tako da varijablu prvo bacimo u funkciju `density`, a potom u `plot`.
-
-plot(density(podaci$mf_FairnessCheating))
-
-# Moje poznavanje base grafike staje otprilike ovdje jer za vizualizacije koristim paket `ggplot`, koji je nekad nešto zahtjevniji, ali je i dosta moćniji.
-
-# `ggplot` dolazi s funkcijom `qplot` (*quick plot*), koja služi za brzinsko crtanje. Dijagram raspršenja, recimo, možemo dobiti isto kao i s base `plotom`, ali ovaj je nešto ljepši.
-
-ggplot2::qplot(data = podaci, x = mf_CareHarm, y = mf_FairnessCheating)
-
-# A lako možemo promijeniti boju točaka na temelju, recimo, spola.
-
-ggplot2::qplot(data = podaci, x = mf_CareHarm, y = mf_FairnessCheating,
-              color = pi_gender)
-
-# Fora kod `ggplota` je u tome da se graf izgrađuje sloj po sloj. `qplot` nešto skraćuje taj proces, ali i dalje ostavlja mogućnost dodavanja slojeva pomoću operatora `+`.
-
-# Kad bismo, recimo, grafu još htjeli dodati regresijske pravce za svaku skupinu, na kraj bismo dodali:
-
-ggplot2::qplot(data = podaci, x = mf_CareHarm, y = mf_FairnessCheating,
-              color = pi_gender) + geom_smooth(method = 'lm', se = F)
-
-# Evo i histograma (koji je meni, ovako po difoltu, ružniji od base R-ovog):
-
-ggplot2::qplot(data = podaci, x = mf_FairnessCheating,
-              geom = 'histogram')
-
-ggplot2::qplot(data = podaci, x = pi_gender,
-              y = mf_FairnessCheating, geom = 'boxplot')
-
-ggplot2::qplot(data = podaci, x = mf_FairnessCheating,
-              geom = 'density', fill = pi_gender,
-              # određuje razinu transparentnosti
-              alpha = .4)
-
-# S `qplotom` (a pogotovo s `ggplotom`) se može puno igrati, tako da neću pretjerano nastavljati ovaj niz. Igranje prepuštam čitatelju.
-
-# Za kraj ovog dijela, pogledat ćemo jednu funkciju iz `psych` paketa koja daje dosta opširan vizualni sažetak podatka.
-
-podaci %>%
-dplyr::select(., starts_with('mf_')) %>%
-psych::pairs.panels(., lm = T, method = 'spearman',
-                   # ovo je veličina slova, ne znam
-                   # zašto se zove cex...
-                   cex = .5,
-                   # malo razbaca točke koje se nalaze
-                   # na istoj poziciji radi dobivanja
-                   # boljeg dojma o broju jedinki
-                   jiggle = T)
-
-#
-# # Motivacijski primjeri - missing data
-
-# Za početak, ubacit ćemo neke missing vrijednosti (`NA`) u naš set podataka.
-
-set.seed(151059)
-
-podaci %>%
-dplyr::select(., 1:moralIdentityInternalization04_rec) %>%
-apply(., MARGIN = c(1,2), FUN = function(x) {
-    if(runif(1) < .1) x <- NA
-    else return(x)
-}) %>%
-# primijetiti da u ovom pozivu selecta nema točke!
-# to je zato što select pozivamo na tablici 'podaci',
-# a ne na tablici koju guramo kroz pipeline
-cbind(., dplyr::select(podaci, starts_with('pi_'))) ->
-podaci_na
-
-head(podaci_na)
-
-# Prethodni blok koda donosi neke novosti.
-#
-# 1) `set.seed` je funkcija kojom možemo *random number generator* R-a postaviti na neku vrijednost (*seed*). Po mojim saznanjima, to se uglavnom radi zato da bi se osigurala reproducibilnost stohastičkih procesa. Zbog toga bi obrazac `NA` vrijednosti koje vi dobivate trebao biti jednak onom koji ja dobivam.
-#
-# 2) `apply` je funkcija koja služi kao skraćenica za `for` petlju (koju nismo obradili, heh). `apply` prima (i) set podataka, (ii) funkciju `FUN` te (iii) `MARGIN`, koji određuje na što će se `FUN` primijenjivati, a može biti `1` (redovi), `2` (stupci) ili `c(1, 2)` (svaki pojedini element)
-#
-# Sintaksa za `for` petlju je, inače:
-# ```
-# for(i in 1:10) {
-#     print(i)
-#  }
-#  ```
-#  
-# tj.
-#
-# ```
-# for(nešto preko čega možemo iterirati, tj. prolaziti) {
-# naredbe
-# }
-# ```
-#
-# 3) kao `FUN` smo dali anonimnu funkciju koju smo *ad hoc* definirali koristeći naredbu `function(...)`. Definirali smo funkciju koja prima samo jedan element (`x`), a koji predstavlja jedan podatak dohvaćen iz tablice koju smo proslijedili u `apply`. Da smo vrijednost `MARGIN` stavili na `1`, `x` bi bio red podataka, a da smo je stavili na `2`, stupac podataka.
-#
-# 4) vidjeli smo i R-ovu
-# ```
-# if(logički uvjet) naredba
-# else druga naredba
-# ```
-# sintaksu. Za `if ... else` je bitno znati da **ne može raditi s vektorima**, već samo s pojedinim elementima. `case_when` i `ifelse` (base R) su vektorizirane verzije `if ... else` naredbi.
-#
-# Dosad, dakle, imamo kod koji je odabrao sve redove i samo neke stupce tablice `podaci`, te ih proslijedio u funkciju `apply`. `apply` potom uzima svaki pojedini element (odnosno, svaki pojedini podatak, odnosno svaku pojedinu vrijednost) i daje ga u funkciju koju smo sami definirali (koristeći `function`). Unutar funkcije, taj je element dostupan kao `x`.
-#
-# Unutar funkcije, imamo `if ... else` izraz u kojem:
-#
-# 5) koristimo `runif(1)` (**random uniform**) kako bismo dobili **jednu** vrijednost u rasponu od 0 do 1, te provjeravamo je li ta vrijednost manja od `.1`. Ako jest, `if` uvjet se evaluira kao `TRUE` i u `x` upisujemo vrijednost `NA`, kojom R predstavlja vrijednosti koje nedostaju. S obzirom na `runif`, vjerojatnost upisivanja vrijednosti `NA` je 10%. Ako `runif` vrati vrijednost veću od `.1`, `if` uvjet se evaluira kao `FALSE` te prelazimo na `else` dio. Naredba pod `else` je `return(x)`, što znači da u tom slučaju funkcija treba vratiti vrijednost `x`.
-#
-# 6) Budući da je `select` vratio tablicu koja ne sadrži `pi_` varijable, a koje želimo imati, koristimo `cbind` (*column bind*) kako bismo dodali i te varijable. Kao prvi argument, u `cbind` stavljamo `.`, dakle modificiranu tablicu koju smo provukli kroz `apply` (i kroz cijeli *pipeline*), a kao drugi argument dajemo tablicu s odabranim stupcima iz tablice `podaci`.
-#
-# Na kraju, to spremamo kao `podaci_na`.
-
-# Sad kad imamo set podataka koji sadrži, missing vrijednosti, bacit ćemo se na motiviranje. Za početak, pogledat ćemo funkciju koja nam omogućava da dobijemo brzinski pregled svojih podataka.
-
-# `create_report` stvorit će interaktivni `.html` file koji sadrži hrpu deskriptivne statistike i neke zgodne grafove. Output se može jako prilagođavati dodavanjem argumenata, ali funkcija može biti zgodno-korisna i bez njih.
-#+ eval=F
-
-podaci %>%
-dplyr::select(., contains('foundations')) %>%
-DataExplorer::create_report(.)
-
-# Sad ćemo pogledati neke funkcije koje nam olakšavaju pregledavanje obrazaca podataka koji nedostaju. Opći pregled stanja s podacima koji nedostaju možemo dobiti pomoću funkcije `vis_dat`. Radi preglednosti, ograničit ćemo se na prvih 10 i posljednjih 5 varijabli.
-
-podaci_na %>%
-# kako bismo odabrali posljednjih 5 stupaca,
-# koristimo ncol za dobivanje broja stupaca te
-# od vrijednosti koju dobijemo oduzimamo 5, a
-# raspon protežemo do ncol. ovdje ncol vraća
-# 66, pa efektivno imamo 61:65. oduzimanje od
-# prvog poziva ncol mora biti u zagradama, inače
-# error!
-dplyr::select(., 1:10, (ncol(.)-5):ncol(.)) %>%
-visdat::vis_dat(.)
-
-# Ovaj graf prikazuje svakog pojedinog sudionika na y-osi, te svaki pojedinu varijablu na x-osi. Različite boje označavaju tip varijable (`factor`, `numeric`...) te `NA`, odnosno missing. Dakle, gdje god je nešto sivo, tamo nedostaje vrijednost.
-
-# Funkcija `vis_miss` crta sličan graf, samo što ne označava tipove varijabli i govori nam koliki je postotak varijabli missing.
-
-podaci_na %>%
-dplyr::select(., 1:10, (ncol(.)-5):ncol(.)) %>%
-visdat::vis_miss(.)
-
-# Još jedan grubi prikaz:
-
-podaci_na %>%
-dplyr::select(1:15) %>%
-naniar::gg_miss_var(.)
-
-# Pomoću `n_miss` možemo dobiti broj vrijednosti koje nedostaju. Komplementarna funkcija je `n_complete`, koja, jel...
-
-naniar::n_miss(podaci_na)
-naniar::n_complete(podaci_na)
-
-podaci_na %>%
-{naniar::n_miss(.) + naniar::n_complete(.) ==
-    nrow(.) * ncol(.)}
-
-# Pomoću `miss_case_summary` možemo dobiti informaciju o tome koliko svaki pojedini sudionik ima missinga.
-
-podaci_na %>%
-# gledamo samo prvih 20
-slice(1:20) %>%
-naniar::miss_case_summary(.)
-
-# Ove funkcije su zgodne za opći pregled. Ako želimo pobliže ispitati obrasce nedostajućih podataka, trebamo ući dublje u odnose među pojedinim varijablama. Prva funkcija koja nam ovdje uskače upomoć dolazi iz `naniara`.
-
-ggplot2::ggplot(podaci_na, aes(x = attitudesAndNorms01,
-                     y = attitudesAndNorms02)) +
-       naniar::geom_miss_point()
-
-# Točke označene kao `Missing` imaju vrijednost na osi (tj. varijabli) kojoj su priklonjene (tj. s kojom su paralelne), ali nemaju na varijabli na koju su okomite. 
-#
-# `Missing` točke nalaze se ispod minimuma koji vrijednosti dosežu na skali na kojoj nemaju rezultat. Da bude jasnije:
-
-podaci_na %>%
-dplyr::select(., attitudesAndNorms01, attitudesAndNorms02) %>%
-summary(.)
-
-# Vidimo da je minimum na `attitudesAndNorms01` 2, a na `attitudesAndNorms02` -2. Missing vrijednosti na grafu se nalaze ispod tih vrijednosti.
-
-# `gg_miss_upset` daje nam prikaz obrasca povezanosti missing vrijednosti kroz varijable.
-
-podaci_na %>%
-dplyr::select(., 1:10) %>%
-naniar::gg_miss_upset(., nsets = 5, nintersect = 18)
-
-# Pomoću `nsets = 5` ograničili smo se na 5 najkritičnijih varijabli. Vidimo da broj missing vrijednosti (na grafu označeno kao `Set Size`) pada od `callToAction_NA` prema `moralFoundatoins08_NA`.
-
-# `nintersect` određuje koliko će *križanja* varijabli biti prikazano. Ova vrijednost trebala bi biti barem `nsets` + 1 da bi imala smisla.
-
-# Okomiti stupci pokazuju nam koliko je missing vrijednosti u pojedinom križanju (uključujući i "križanja" jedne varijable). Uzmimo `callToAction_NA`, koji ima 18 vrijednosti koje nedostaju, odnosno nema 18 vrijednosti. Kad zbrojimo sve okomite stupce u kojima ta varijabla ima točku, doći ćemo do broja 18.
-
-# Nekad je zgodno vidjeti razlikuju li se obrasci nedostajanja ovisno o nekoj kategoričkoj varijabli. U tu svrhu, možemo koristiti `gg_miss_fct`. Funkcija prima dva argumenta, neku tablicu s podacima i kategoričku varijablu na temelju koje treba prikazati obrazac vrijednosti koje nedostaju.
-
-podaci_na %>%
-dplyr::select(., 1:10, pi_education) %>%
-naniar::gg_miss_fct(., fct = pi_education)
-
-# Ovdje, recimo, možemo vidjeti da nitko ili gotovo nitko tko je završio osnovnu školu ili doktorat nije odgovorio na osmo pitanje u `attitudesAndNorms08`, što nije pretjerano zabrinjavajuće jer su podaci simulirani, ali bi se u stvarnoj situaciji čovjek možda htio zapitati.
-
-#
-# # Prtljanje po podacima iz SPSS-a za opće dobro
-
-# Kao što je na početku najavljeno, proći ćemo kroz R-ovsko prtljanje po korumpiranim podacima iz SPSS-a.
-
-head(podaci_spss)
-
-# Prvo ćemo korumpirane redove izvući u novi `data.frame` - `podaci_spss_korumpirani`. To možemo napraviti tako da tražimo sve redove čiji unos pod `pi_gender` ne sadrži string *degree*. Dakle, koristit ćemo funkciju `filter`, u kojoj ćemo pozvati funkciju `str_detect`. Ona vraća vektor logičkih vrijednosti (`TRUE, FALSE, TRUE, ...`) koje `filter` može iskoristiti za, je li, filtriranje.
-
-podaci_spss %>%
-dplyr::filter(., str_detect(.$pi_gender, 'degree')) ->
-podaci_spss_korumpirani
-
-# Zatim, filtiramo originalni `data.frame`, tako da u njemu ostaju samo redovi koji nisu korumpirani, odnosno oni koji nemaju string *degree*. Možemo samo kopipejstati raniji kod i pred poziv `str_detect` staviti uskličnik, koji je simbol za negaciju (pretvorit će vektor iz `TRUE, FALSE, TRUE, ...` u `FALSE, TRUE, FALSE, ...`). Također, mičemo upisivanje u novu varijablu, i pipu mijenjamo u assignment pipu.
-
-podaci_spss %<>%
-dplyr::filter(., !str_detect(.$pi_gender, 'degree'))
-
-# Sad trebamo popraviti unose u `podaci_spss_korumpirano` i popravljene unose prilijepiti na `podaci_spss`.
-
-head(podaci_spss_korumpirani)
-
-# Sredit ćemo si `dput` output da si uštedimo neko tipkanje u kasnijim koracima.
-
-podaci_spss_korumpirani %>%
-dplyr::select(., pi_gender:V65) %>%
-colnames(.) %>%
-dput(.)
-
-# Za sređivanje stupaca možemo iskoristiti malo zgodnog prtljanja s `unite` i `separate` funkcijama. `unite` radi točno ono što nam treba - uzima $n$ stupaca i spaja ih u jedan novi (onaj definiran pod arugmentom `col`). Vrijednosti iz različitih stupaca odvaja stringom navedenim pod `sep`. Po difoltu, stupci koje spajamo se brišu te ostaje samo novi stupac. To ponašanje možemo mijenjati putem argumenta `remove`. U ovom slučaju, to je okej, pa ćemo ostaviti difolt argument.
-#
-# Želimo spojiti unose pod `pi_education` i `pi_gender` u `pi_education`. Kao `sep` ćemo koristiti prazan string. Dakle, radimo sljedeće:
-
-podaci_spss_korumpirani %>%
-tidyr::unite(., 
-            # novi stupac
-            col = pi_education,
-            # stupci koje spajamo
-            pi_education, pi_gender,
-            # separator
-            sep = '') %>%
-# ovaj dio je samo za fokusiranje outputa
-dplyr::select(., pi_education:ncol(.)) %>%
-head(.)
-
-# Vidimo da su vrijednosti pod `pi_education` točne, ali sad imena varijabli ne odgovaraju njihovom sadržaju. Na primjer, spol se nalazi pod `pi_ideology`.
-
-# Kako ne bismo morali mijenjati ime svake pojedine varijable, iskoristiti ćemo moći koje nam nudi funkcija `separate`. Ona uzima jedan stupac i razdvaja ga na $n$ stupaca na temelju separatora `sep`. Novi stupci dobivaju imena definirana pod `into`.
-
-# Stoga, možemo prvo uzeti sve preostale stupce - od `pi_ideology` do `V65` - i spojiti ih u jedan stupac - `tmp` (kao, *temporary*). Kao `sep` ćemo korsititi `@@`, budući da se taj string vrlo vjerojato neće naći nigdje u vrijednostima varijabli. Mogli bismo uzeti bilo koji drugi simbol za koji smo sigurni da se ne pojavljuje.
-
-podaci_spss_korumpirani %>%
-tidyr::unite(., col = pi_education,
-            pi_education:pi_gender,
-            sep = '') %>%
-tidyr::unite(.,col = tmp,
-            pi_ideology:V65,
-            sep = '@@') %>%
-dplyr::select(., pi_education:ncol(.)) %>%
-head(.)
-
-# Dobili smo novi stupac `tmp` koji sadrži ružne stringove.
-
-# Sad ćemo iskoristiti `separate` kako bismo vrijednosti u tom stupcu podijelili po separatoru `@@`. U argument `into` ćemo kopipejstati output funkcije `dput` koji smo ranije priredili, pri čemu ćemo obrisati posljednji unos (`V65`) jer to ne želimo gledati u konačnoj tablici.
-
-podaci_spss_korumpirani %>%
-tidyr::unite(., col = pi_education,
-            pi_education:pi_gender,
-            sep = '') %>%
-tidyr::unite(.,col = tmp,
-            pi_ideology:V65,
-            sep = '@@') %>%
-tidyr::separate(., col = tmp,
-               # ovo je output funkcije dput koju smo
-               # pozvali ranije, bez posljednjeg unosa,
-               # V65
-               into = c("pi_gender", "pi_ideology",
-                        "pi_income", "pi_nationality", 
-                        "pi_previousDonations"),
-               sep = '@@') %>%
-dplyr::select(., pi_education:ncol(.)) %>%
-head(.)
-
-# Sad imamo ispravno posložene stupce. Možemo maknuti nepotrebne navodnike iz unosa pod `pi_education` koristeći `mutate_at` da na taj stupac primijenimo funkciju `str_replace_all`.
-
-podaci_spss_korumpirani %>%
-tidyr::unite(., col = pi_education,
-            pi_education:pi_gender,
-            sep = '') %>%
-tidyr::unite(.,col = tmp,
-            pi_ideology:V65,
-            sep = '@@') %>%
-tidyr::separate(., col = tmp,
-               into = c("pi_gender", "pi_ideology",
-                        "pi_income", "pi_nationality", 
-                        "pi_previousDonations"),
-               sep = '@@') %>%
-dplyr::mutate_at(., .vars = vars(pi_education),
-                .f = stringr::str_replace_all,
-                pattern = '"', replacement = '') %>%
-dplyr::select(., pi_education:ncol(.)) %>%
-head(.)
-
-# Sad kad smo zadovoljni outputom našeg pipelinea, spremit ćemo promjene.
-#
-# NB: Moramo maknuti zadnje dvije linije (koje smo koristili za fokusiranje outputa) jer će inače `podaci_spss_korumpirano` sadržavati samo ovo što vidimo gore.
-
-podaci_spss_korumpirani %<>%
-tidyr::unite(., col = pi_education,
-            pi_education:pi_gender,
-            sep = '') %>%
-tidyr::unite(.,col = tmp,
-            pi_ideology:V65,
-            sep = '@@') %>%
-tidyr::separate(., col = tmp,
-               into = c("pi_gender", "pi_ideology",
-                        "pi_income", "pi_nationality", 
-                        "pi_previousDonations"),
-               sep = '@@') %>%
-dplyr::mutate_at(., .vars = vars(pi_education),
-                .f = stringr::str_replace_all,
-                pattern = '"', replacement = '')
-
-head(podaci_spss_korumpirani)
-
-# Za kraj, trebamo ovu tablicu pripojiti tablici `podaci_spss`. To možemo učiniti pomoću funkcije `rbind` (*rows bind*).
-
-dim(podaci_spss)
-dim(podaci_spss_korumpirani)
-
-# Vidimo da ove dvije tablice imaju različit broj stupaca. To je zato jer `podaci_spss` i dalje imaju varijablu `V65`, koja je u toj tablici prazna. Obrisat ćemo je.
-
-podaci_spss$V65 <- NULL
-
-dim(podaci_spss)
-dim(podaci_spss_korumpirani)
-
-# Sad možemo spojiti te dvije tablice.
-
-podaci_spss %<>%
-rbind(., podaci_spss_korumpirani)
-
-#
-# # Reference i dodatna literatura
-#
-
-# [Grolemund, G. i Wickham, H. *R for data science*. O'Reilly Media, Inc.](https://r4ds.had.co.nz/)
-#
-#
-# [Michael Crawley (2012). *The R Book*.](https://www.cs.upc.edu/~robert/teaching/estadistica/TheRBook.pdf)
-#
-#
-# Pipe
-#
-# - https://cran.r-project.org/web/packages/magrittr/vignettes/magrittr.html
-# - http://r4ds.had.co.nz/pipes.html
-#
-# Regularni izrazi
-#
-# - [jako dobar šalabahter](https://remram44.github.io/regex-cheatsheet/regex.html)
-# - [još jedan](http://www.rexegg.com/regex-quickstart.html)
-# - [stranica koja omogućuje isprobavanje različitih uzoraka na tekstu](https://regexr.com/)
-# - [uvod u `stringr`](https://cran.r-project.org/web/packages/stringr/vignettes/stringr.html)
-#
-# Data wrangling (dplyr i srodno):
-#
-# - [prvi od četiri dijela (linkovi na druge na dnu stranice) blogova o formatiranju podataka](https://suzanbaert.netlify.com/2018/01/dplyr-tutorial-1/)
-#
-# Korisni savjeti za organizaciju podataka u tablicama
-#
-# - Broman, K. W., & Woo, K. H. (2018). Data organization in spreadsheets. *The American Statistician, 72*(1), 2–10.
-#
-# `naniar`:
-#
-# - [intro](https://cran.r-project.org/web/packages/naniar/vignettes/getting-started-w-naniar.html)
-# - [galerija vizualizacija](https://cran.r-project.org/web/packages/naniar/vignettes/naniar-visualisation.html)
-#
-# Šalabahteri (obavezno skinuti!)
-#
-# - [obavezno!](https://www.rstudio.com/resources/cheatsheets/)
-#
-# Pretvaranje `.sav` fileova u `.csv`
-#
-# - https://pspp.benpfaff.org/
-
-#
-# ## Epilog
-#
-
-sessionInfo() 
+spread(., key = pitanje, value = odgovor) %>%
+arrange(., sub_index)
