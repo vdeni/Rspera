@@ -421,167 +421,119 @@ c('hehehe', 'hehahohohehe', 'hahahahihi') %>%
 
 ##### Nastavak pripreme podataka
 
-# Zasad smo pogledali strukturu podatka (`str`), kako izgledaju sirovi podaci (`head` i `tail`) te neke statističke sažetke (`describe` i `summary`, `skim`).
-#
-# Sad ćemo se baciti na formatiranje sirovih podataka u nešto što nam je zgodnije za rad.
+# Zasad smo pogledali strukturu podatka (`str()` ili `glimpse()`), kako
+# izgledaju sirovi podaci (`head` i `tail`) te neke statističke sažetke
+# (`summary`). Sad ćemo se baciti na formatiranje sirovih podataka u nešto što
+# nam je zgodnije za rad.
 
 # Prvo ćemo se prisjetiti strukture podatka kojima baratamo.
 
-str(podaci)
+glimpse(podaci)
 
-# Za početak, iskoristit ćemo moći opažanja i primijetiti da su varijable koje počinju s `pi` (osim `pi_age`) spremljene kao `character` vektori. Taj tip vrijednosti nije zgodan za većinu obrada koje bismo mogli htjeti raditi i razlog je zašto nam `summary` vraća nekoristan sažetak.
+# Za početak, iskoristit ćemo moći opažanja i primijetiti da su varijable koje
+# počinju s `pi` (osim `pi_age` i `pi_education`) spremljene kao `character`
+# vektori. Taj tip vrijednosti nije zgodan za većinu obrada koje bismo mogli
+# htjeti raditi i razlog je zašto nam `summary()` vraća nekoristan sažetak.
 
-#
-# ### Baratanje kategoričkim varijablama
+##### Baratanje kategoričkim varijablama
 
 # Stoga, pretvorit ćemo te varijable iz `charactera` u `factore`.
 
-# Varijable možemo modificirati koristeći `mutate` obitelj funkcija. Ovdje ćemo iskoristiti `mutate_at`, koji nam omogućuje da specificiramo varijable na koje želimo primijeniti neku funkciju.
-#
-# Uhvatit ćemo sve `pi` varijable osim `pi_age` te na njih primijeniti funkciju `as.factor`, koja će ih pretvoriti u `factore`.
+# Varijable možemo modificirati koristeći `mutate` obitelj funkcija. Ovdje ćemo
+# iskoristiti `mutate_at()`, koji nam omogućuje da specificiramo varijable na
+# koje želimo primijeniti neku funkciju. Uhvatit ćemo sve `pi` varijable osim
+# `pi_age` i `pi_education` te na njih primijeniti funkciju `as.factor()`, koja
+# će ih pretvoriti u `factore`.
 
-# Budući da će `mutate_at` zadanu funkciju primijeniti na postojeće stupce, dobro je (a) uvjeriti se da biramo prave stupce i (b) uvjeriti se da radimo ono što želimo raditi prije nego što spremimo promjene.
+# Budući da će `mutate_at()` zadanu funkciju primijeniti na postojeće stupce,
+# dobro je (a) uvjeriti se da biramo prave stupce i (b) uvjeriti se da radimo
+# ono što želimo raditi prije nego što spremimo promjene.
 
-# (a) ćemo riješiti koristeći `colnames` i `select`.
-
-podaci %>%
-select(., starts_with('pi'), -pi_age) %>%
-colnames(.)
-
-# Vidimo da ciljamo ispravne stupce. Sad možemo eksperimentirati s `mutate_at`.
+# (a) ćemo riješiti koristeći `colnames()` i `select()`.
 
 podaci %>%
-mutate_at(.,
-                # varijable koje želimo zahvatiti treba omotati u
-                # funkciju vars; ona prima iste pomoćne funkcije kao
-                # i select
-                .vars = vars(starts_with('pi'), -pi_age),
-                .fun = as.factor) %>%
-# ovaj dio je samo radi prikazivanja
-select(., starts_with('pi')) %>%
-str(.)
+    select(.,
+           starts_with('pi'),
+           -c(pi_age, pi_education)) %>%
+    colnames(.)
 
-# Zadovoljni smo outputom, pa možemo malko modificirati kod i spremiti promjene.
-
-podaci %<>%
-mutate_at(.,
-                .vars = vars(starts_with('pi'), -pi_age),
-                .fun = as.factor)
-
-str(podaci)
-
-# Ako sad pozovemo `summary`, dobit ćemo korisnije rezultate.
+# Vidimo da ciljamo ispravne stupce. Sad možemo eksperimentirati s
+# `mutate_at()`.
 
 podaci %>%
-select(., starts_with('pi_'), -pi_age) %>%
-summary(.)
+    mutate_at(.,
+              # varijable koje želimo zahvatiti treba omotati u
+              # funkciju `vars()`; ona prima iste pomoćne funkcije kao
+              # i `select()`
+              .vars = vars(starts_with('pi'),
+                           -c(pi_age, pi_education)),
+              .fun = as.factor) %>%
+    # ovaj dio je samo radi prikazivanja
+    select(.,
+           starts_with('pi')) %>%
+    glimpse(.)
 
-# Gledajući output ove funkcije, primjećujemo da su pojedine vrijednosti prilično dugačke (npr. Some professional diploma, no degree).
+# Zadovoljni smo outputom, pa možemo spremiti promjene.
 
-# Koristeći `forcats` paket (dio `tidyversea`), vrlo lako možemo rekodirati te vrijednosti. Za početak, da bismo si uskratili nešto tipkanja, možemo pozvati funkciju `dput` kako bismo dobili reprezentaciju razina faktora koju možemo kopipejstati.
+podaci <- podaci %>%
+    mutate_at(.,
+              .vars = vars(starts_with('pi'),
+                           -c(pi_age, pi_education)),
+              .fun = as.factor)
 
-podaci$pi_education %>% levels(.) %>% dput(.)
+glimpse(podaci)
 
-podaci$pi_education %>%
-head(., 10) %T>% print(.) %>%
-fct_recode(., 'elem-sch' = "Elementary School", 'hi-sch' = "High school",
-                    'masters' = "Master's degree", 'phd' = "PhD or higher", 
-                    'prof-dip' = "Some professional diploma, no degree", 
-                    'bac' = "The baccalaureate") %>% print(.)
+# Ako sad pozovemo `summary()`, dobit ćemo korisnije rezultate.
 
-# Kratko pojašnjenje: uzimamo samo varijablu `pi_education` te prvih 10 unosa (`head`). Usput pozivamo `print` (s T-pipom!) kako bismo ispisali izvornih 10 vrijednosti. Varijablu s tih 10 vrijednosti šaljemo u `fct_recode`, gdje rekodiramo razine. Naposljetku, pozivamo `print` kako bismo ispisali nove vrijednosti (`print` ovdje nije potreban, tu je samo zato da bi se output izjednačio onom koji dobivamo nakon prvog poziva; to je specifičnost Jupyter Notebooka).
+podaci %>%
+    select(.,
+           starts_with('pi_'),
+           -c(pi_age)) %>%
+    summary(.)
 
-# Sad kad smo zadovoljni outputom, možemo maknuti nepotrebne dijelove i upisati promjenu.
+# Gledajući output ove funkcije, primjećujemo da su pojedine vrijednosti
+# prilično dugačke (npr. 'Some professional diploma no degree').
 
-podaci$pi_education %<>%
-fct_recode(., 'elem-sch' = "Elementary School", 'hi-sch' = "High school",
-                    'masters' = "Master's degree", 'phd' = "PhD or higher", 
-                    'prof-dip' = "Some professional diploma, no degree", 
-                    'bac' = "The baccalaureate")
+# Koristeći `forcats` paket (dio `tidyversea`), vrlo lako možemo rekodirati te
+# vrijednosti. To ćemo učiniti pomoću funkcije `fct_recode()`:
+
+podaci$pi_education <- podaci$pi_education %>%
+    fct_recode(.,
+               'elem-sch' = "Elementary School",
+               'hi-sch' = "High school",
+               'masters' = "Master's degree",
+               'phd' = "PhD or higher",
+               'prof-dip' = "Some professional diploma no degree",
+               'bac' = "The baccalaureate")
+
+# Razine `factor` varijable možemo dohvatiti pomoću `levels()` funkcije:
 
 levels(podaci$pi_education)
 
-#
-# ### Vježba
+# Isto možemo napraviti s varijablom `pi_income`. Rekodirat ćemo razine tako da
+# `avg` označava `About the average`, a razine ispod i iznad toga označit ćemo
+# dodavanjem odgovarajućeg broja slova 'm' (kao 'minu') odnosno 'p' (kao 'plus')
+# na kraj (npr. `avg_m` ili `avg_pp`).
 
-# Pokušajte napraviti isto s varijablom `pi_income`.
-#
-# Rekodirajte razine tako da `avg` označava `About the average`, a razine ispod i iznad toga označite dodavanjem odgovarajućeg broja minusa odnosno pluseva na kraj (npr. `avg-` ili `avg++`).
+podaci$pi_income <- podaci$pi_income %>%
+    fct_recode(.,
+               'avg' = "About the average",
+               'avg_pp' = "Much above the average",
+               'avg_mm' = "Much below the average", 
+               'avg_p' = "Somewhat above the average",
+               'avg_m' = "Somewhat below the average")
 
-podaci$pi_income %>% levels(.) %>% dput(.)
+# Ovdje možemo primijetiti da je redoslijed razina podosta besmislen, tako da
+# ćemo ih izvrtiti tako da idu od najniže do najviše. To ćemo učiniti pomoću
+# funkcije `fct_relevel()`.
 
-podaci$pi_income %<>%
-fct_recode(., 'avg' = "About the average",
-                    'avg++' = "Much above the average",
-                    'avg--' = "Much below the average", 
-                    'avg+' = "Somewhat above the average",
-                    'avg-' = "Somewhat below the average")
+podaci$pi_income <- podaci$pi_income %>%
+    fct_relevel(.,
+                'avg_mm', 'avg_m', 'avg', 'avg_p', 'avg_pp')
 
-# Ovdje možemo primijetiti da je redoslijed razina podosta besmislen, tako da ćemo ih izvrtiti tako da idu od najniže do najviše. To ćemo učiniti pomoću funkcije `fct_relevel`.
+podaci$pi_income
 
-podaci$pi_income %>%
-fct_relevel(., 'avg--', 'avg-', 'avg', 'avg+', 'avg++') %>%
-# još ćemo faktor pretvoriti u ordered
-factor(., ordered = T) %>%
-tail(., 10) %>% print(.)
-
-podaci$pi_income %<>%
-fct_relevel(., 'avg--', 'avg-', 'avg', 'avg+', 'avg++') %>%
-factor(., ordered = T)
-
-str(podaci$pi_income)
-
-# Nećemo prolaziti kroz rekodiranje svih faktora, ali hoćemo proći kroz rekodiranje nacionalnosti, zato jer nam to daje mogućnost da se igramo sa stringovima i regularnim izrazima.
-
-#
-# ### Kodiranje nacionalnosti (pitanje otvorenog tipa)
-
-# Pitanje o nacionalnosti bilo je otvorenog tipa, tako da ista nacionalnost može biti reprezentirana na različite načine.
-
-podaci$pi_nationality %>% head(.)
-
-# Već u prvih 6 unosa vidimo da se javljaju "US", "USA", "United States of America" te "American", što sve označava istu nacionalnost. Koristeći regularne izraze i funkciju `case_when`, lako možemo grupirati različite unose.
-
-# Za početak, iskoristit ćemo funkciju `tolower` kako bismo sve stringove pretvorili u mala slova (tako da ne moramo paziti na to da su "american" i "American" različiti unosi) te funkciju `str_trim`, koja će ukloniti razmake s početka i kraja stringova (jer je moguće da je netko unio "American", a netko "American ").
-
-podaci$pi_nationality %<>% tolower(.) %>% str_trim(.)
-
-head(podaci$pi_nationality)
-
-# Ok. Za početak, možemo pozvati `table` da dobijemo pregled frekvencija po faktorima, te `sort` kako bismo ih poredali od najučestalijih do najrjeđih.
-
-table(podaci$pi_nationality) %>% sort(., decreasing = T)
-
-# Budući da ovdje imamo samo 100 sudionika i razmjerno malo različitih nacionalnosti, rekodiranje je lako.
-
-# Za kodiranje nacionalnosti koristit ćemo funkciju `case_when`, koja nam omogućuje da specificiramo neki logički izraz (dakle, nešto što kao rezultat vraća `TRUE` ili `FALSE`) i akciju koju treba napraviti u `TRUE` slučaju.
-
-# `case_when` za argumente prima logičke izraze i akcije odvojene tildom (`~`), pa pozivanje funkcije izgleda ovako:
-#
-# ```
-# case_when(logički-izraz ~ akcija-ako-TRUE,
-#           logički-izraz-2 ~ akcija-ako-TRUE-2)
-# ```
-
-podaci$pi_nationality %>%
-# case_when ovdje moramo obaviti u {} jer inače dobijemo error
-{case_when(str_detect(., 'usa?|american|united states.*|\\w+ americ') ~ 'american',
-           str_detect(., 'dutch|french') ~ 'fr-nl',
-           str_detect(., 'seychelles|turkish|white') ~ 'other',
-           # akciju u svim nespecificiranim slučajevima određujemo
-           # tako da stavimo TRUE ~ akcija. ovdje kao akciju stavljamo
-           # točku, što znači da taj unos treba ostaviti onakvim
-           # kakav je
-           TRUE ~ .)} %>% table(.)
-
-podaci$pi_nationality %<>%
-{case_when(str_detect(., 'usa?|american|united states.*|\\w+ americ') ~ 'american',
-           str_detect(., 'dutch|french') ~ 'fr-nl',
-           str_detect(., 'seychelles|turkish|white') ~ 'other',
-           TRUE ~ .)}
-
-#
-# ### Preimenovanje varijabli
+##### Preimenovanje varijabli
 
 # Nekad su imena varijabli jako nezgrapna, neinformativna, mutava i slično. Budući da ćete se prije ili poslije susresti s takvim imenima, proći ćemo kroz nekoliko načina za mijenjanje imena varijabli.
 
