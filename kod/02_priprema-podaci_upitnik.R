@@ -20,10 +20,10 @@ install.packages(c('tidyverse',
 # ćemo koristiti za baratanje podacima
 library(tidyverse)
 
-# omogućava učitavanje .SAV fielova
+# omogućava učitavanje .SAV datoteka
 library(haven)
 
-# omogućava učitavanje .xlsx fielova
+# omogućava učitavanje .xlsx datoteka
 library(readxl)
 
 # olakšava korištenje relativnih file pathova
@@ -39,7 +39,7 @@ library(here)
 ##### SPSS - .sav
 
 # `.sav` datoteke možemo učitati koristeći funkciju `read_sav()` iz paketa
-# `haven`. Funkcija kao argument prima samo put do datoteke koju želimo učitati.
+# `haven`. Funkciji kao argument trebamo dati put do datoteke koju želimo učitati.
 
 podaci_spss <- read_sav(here('podaci', 'podaci_upitnik.sav'))
 
@@ -96,12 +96,6 @@ glimpse(podaci_eksl)
 
 # U prvom redu (koji funkcije u R-u često nazivaju *header*) obično se nalaze
 # imena varijabli, a u ostalim redovima su njihove vrijednosti.
-
-# Ovako izgledaju prva dva reda i prvih nekoliko stupaca datoteke
-# `podaci_upitnik.csv`:
-#
-# attitudesAndNorms01,attitudesAndNorms02,attitudesAndNorms03, ...
-# 5,5,5,5,4, ...
 
 # Podatke u `.csv` formatu možemo učitati pomoću funkcije `read_csv()` iz
 # `readr` paketa (koji je automatski učitan kad smo učitali `tidyverse`).

@@ -1,0 +1,82 @@
+---
+title: 'Per Rspera ad astra'
+subtitle: 'Priprema podataka pomoću programskog jezika R'
+author: 'Denis Vlašiček // CROSSDA'
+output:
+    xaringan::moon_reader:
+        nature:
+            ratio: '16:9'
+            countIncrementalSlides: false
+            titleSlideClass: [sectionSlide]
+        seal: false
+        css: ['css/custom.css']
+---
+
+class: titleSlide
+
+<script src="https://kit.fontawesome.com/43b8869272.js" crossorigin="anonymous">
+</script>
+
+<img id='logo_crossda' src='images/logo_crossda.svg' style="width: 200px; height: auto; float: left; margin-top: -70px; margin-left: 250pt">
+
+<img id='logo_cessda' src='images/logo_cessda.svg' style="width: 85px; height: auto; float: right; margin-top: -110px; margin-right: 250pt">
+
+<div>
+    <h1 style="padding-right: 100px; margin-right: 0px; color: var(--background); background: white; padding-top: 50px; padding-bottom: 50px; padding-left: 100px;">
+        Per Rspera ad astra
+    </h1>
+</div>
+
+### Priprema podataka pomoću <br> programskog jezika R
+#### Denis Vlašiček > CROSSDA
+
+<span, style='font-family: Comfortaa; font-size: 14pt;'>
+    <i class="fab fa-github"></i> github.com/vdeni/Rspera
+</span>
+
+---
+
+class: sectionSlide
+
+# R
+
+---
+
+<img id='r-jezik' src='images/logo_r.svg' class='pull-left' style="padding-top:150pt;">
+
+<ul class='pull-right' style='padding-top: 90pt'>
+
+<li>programski jezik otvorenog koda</li>
+
+--
+
+<li>bogat ekosustav paketa</li>
+
+--
+ 
+<li>strma krivulja učenja?</li>
+
+--
+
+<li>brojne mogućnosti!</li>
+
+</ul>
+
+---
+
+## Reference i resursi
+
+- *CESSDA Data Management Expert Guide:* 
+https://www.cessda.eu/Training/Training-Resources/Library/Data-Management-Expert-Guide
+- Wickham i Grolemund: *R for Data Science.* https://r4ds.had.co.nz/
+- Serija blog postova sa zgodnim savjetima za baratanje podacima: 
+https://suzanbaert.netlify.app/2018/01/dplyr-tutorial-1/
+- Šalabahter za razne regularne izraze: https://remram44.github.io/regex-cheatsheet/regex.html
+
+---
+
+## Reference i resursi
+
+- RStudio šalabahteri za razne R pakete: https://www.rstudio.com/resources/cheatsheets/
+- R ikona nastale na temelju [FontAwesome](https://fontawesome.com/) ikona
+koje su pokrivene CC-BY 4.0 [licencom](https://fontawesome.com/license).
