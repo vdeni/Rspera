@@ -17,10 +17,6 @@ class: titleSlide
 <script src="https://kit.fontawesome.com/43b8869272.js" crossorigin="anonymous">
 </script>
 
-<img id='logo_crossda' src='images/logo_crossda.svg' style="width: 200px; height: auto; float: left; margin-top: -70px; margin-left: 250pt">
-
-<img id='logo_cessda' src='images/logo_cessda.svg' style="width: 85px; height: auto; float: right; margin-top: -110px; margin-right: 250pt">
-
 <div>
     <h1 style="padding-right: 100px; margin-right: 0px; color: var(--background); background: white; padding-top: 50px; padding-bottom: 50px; padding-left: 100px;">
         Per Rspera ad astra
@@ -30,9 +26,22 @@ class: titleSlide
 ### Priprema podataka pomoću <br> programskog jezika R
 #### Denis Vlašiček > CROSSDA
 
+<img id='logo_cessda' src='images/logo_cessda.svg' style="width: 85px; height: auto; float: right; margin-top: 20px; margin-right: 70pt; padding-left: 100px">
+
+<img id='logo_crossda' src='images/logo_crossda.svg' style="width: 200px; height: auto; float: left; margin-top: 50px; margin-left: 70pt; padding-bottom: 100px">
+
 <span, style='font-family: Comfortaa; font-size: 14pt;'>
     <i class="fab fa-github"></i> github.com/vdeni/Rspera
 </span>
+
+<span, style='font-family: Comfortaa; font-size: 14pt;'>
+    <i class="fab fa-twitter"></i> dvlasicek | crossda_data
+</span>
+
+<span, style='font-family: Comfortaa; font-size: 14pt;'>
+    <i class="fas fa-envelope"></i> dvlasice@ffzg.hr
+</span>
+
 
 ---
 
