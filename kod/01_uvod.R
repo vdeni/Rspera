@@ -2,7 +2,7 @@
 
 # U ovom dijelu proći ćemo kroz osnove programskog jezika R. Obradit ćemo osnove
 # njegove sintakse i tipove varijabli. Ovdje ćemo proći kroz neke jako bazične
-# stvari. Većina "naprednijih" stvari provlačit će se kroz ostatak radionice.
+# stvari. Većina "naprednijih" stvari provlačit će se kroz drugi dio radionice.
 
 ##### Osnovne matematičke operacije
 
@@ -37,7 +37,8 @@
 ##### Funkcije
 
 # Sa samim matematičkim operacijama nećemo daleko doći. R ima i *funkcije* -
-# operacije koje primaju parametre (eng. *argument*) i vraćaju neke vrijednosti.
+# operacije koje primaju parametre (na engleskom često zvane *argument*) i
+# vraćaju neke vrijednosti.
 # Funkcije u R-u imaju opći oblik `funkcija(argument1, argument2, ...)`.
 
 # Prva funkcija koju ćemo pogledati, a koja nadopunjava matematičke operacije s
@@ -64,7 +65,7 @@ c('patka', "krava", 'pile', "pas")
 # istog tipa. O tipovima ćemo pričati malo kasnije. Sada ćemo se pozabaviti
 # varijablama.
 
-###### Varijable
+##### Varijable
 
 # Kad god smo dosad izvršavali neke funkcije, baratali smo konkretnim
 # vrijednostima (npr. `2 + 2`), a rezultati su ostali lebdjeti negdje u eteru.
@@ -154,7 +155,7 @@ domace_zivotinje[4] == domace_zivotinje[length(domace_zivotinje)]
 # `length(domace_zivotinje)` kao rezultat vraća brojku `4`.
 
 # Također, vidjeli smo da možemo koristiti `==` kako bismo provjerili jesu li
-# dva objekta, odnosno dvije varijable jednake. Na primjer
+# dva objekta, odnosno dvije varijable jednake. Na primjer:
 
 2 + 2 == 4
 
@@ -239,11 +240,11 @@ is.vector(c('vektor', 'od', '4', 'elementa'))
 ##### data.frame
 
 # `data.frame` je vjerojatno najvažnija osnovna struktura (ili barem ona s kojom
-# ćete se najčešće družiti). On odgovara onom što možemo vidjeti u *Data viewu*
-# SPSS-a - sastoji se od redova koji predstavljaju jedinice analize i stupaca
-# koji predstavljaju varijable. Može sadržavati varijable koje su različitih
-# tipova (za razliku od nekih drugih struktura, poput vektora, koje primaju samo
-# jedan tip podataka).
+# ćete se najčešće družiti). On otprilike odgovara onom što možemo vidjeti u
+# *Data viewu* SPSS-a - sastoji se od redova koji predstavljaju jedinice analize
+# i stupaca koji predstavljaju varijable. Može sadržavati varijable koje su
+# različitih tipova (za razliku od nekih drugih struktura, poput vektora, koje
+# primaju samo jedan tip podataka).
 
 # `data.frame` možemo stvoriti koristeći istoimenu funkciju:
 
@@ -350,11 +351,11 @@ str(spisak)
 # puniti raznolikim objektima, čak i drugim listama.
 
 # pojedine elemente listi možemo i imenovati
-raznoliki_objekti <- list(imena = c('Ramiro', 'Zorro', 'Vladimir'),
-                          brojevi = c(3.61, 4.15, 7.151, 20:25),
-                          inception = list(glumci = c('Leonardo di Caprio',
-                                                      'ostali'),
-                                           broj_kamera = 5))
+raznoliki_objekti <- list('imena' = c('Ramiro', 'Zorro', 'Vladimir'),
+                          'brojevi' = c(3.61, 4.15, 7.151, 20:25),
+                          'inception' = list('glumci' = c('Leonardo di Caprio',
+                                                          'ostali'),
+                                             'broj_kamera' = 5))
 
 str(raznoliki_objekti)
 
@@ -382,16 +383,24 @@ raznoliki_objekti$inception$glumci
 # koristeći funkciju `matrix()`.
 
 postava <- matrix(c('Neo', 150, 'Morpheus', 165, 'Agent Smith', 140),
-                  # broj redova matrice
-                  nrow = 3,
                   # broj stupaca matrice
                   ncol = 2,
+                  # broj redova matrice
+                  nrow = 3,
                   # trebaju li se podaci upisivati red po red ili stupac po
                   # stupac default je F
                   byrow = T)
 postava
 
-# Dimenzije matrice možemo dohvatiti funkcijom `dim`, koja je primijenjiva i na
+# U primjeru iznad koristili smo `=` kako bismo *imenovali* argumente funkcije.
+# Ako pogledamo dokumentaciju za funkciju `matrix()`, vidjet ćemo da su oni,
+# redom, `data`, `nrow`, `ncol`, `byrow`. Da smo funkciju iz prethodnog primjera
+# pozvali bez imenovanja argumenata, R bi pretpostavio da se broj 2 odnosi na
+# broj redova, a broj 3 na broj stupaca jer je broj redova (`nrow`) prije broja
+# stupaca (`ncol`) u definiciji funkcije. Međutim, imenovanjem argumenata, mogli
+# smo zamijeniti redoslijed
+
+# Dimenzije matrice možemo dohvatiti funkcijom `dim()`, koja je primijenjiva i na
 # `data.frame` (ali ne i na liste). Funkcija nam vraca dva broja; prvi je broj
 # redova, a drugi je broj stupaca.
 
@@ -413,12 +422,10 @@ rownames(postava)
 
 colnames(postava)
 
-# Iste funkcije možemo koristiti i na `data.frameu`, pri čemu je kod njih na
-# raspolaganju i funkcija `names()`.
+# Iste funkcije možemo koristiti i na `data.frameu`.
 
-names(brojke_i_slova)
+# Za dohvaćanje imena elemenata u listi možemo koristiti funkciju `names()`.
 
-# također, liste
 names(raznoliki_objekti)
 
 # Elementima matrice možemo pristupati pomoću `[]` operatora, ali ne i pomoću

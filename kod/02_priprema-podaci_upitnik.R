@@ -1,4 +1,4 @@
-##### Rdionica: priprema datoteke `podaci_upitnik` za obradu
+##### Priprema datoteke `podaci_upitnik` za obradu
 
 # U ovom dijelu radionice koristit ćemo neke dodatne pakete, koje je potrebno
 # posebno instalirati i učitati. Pakete možete instalirati izvršavanjem naredbe
@@ -352,7 +352,7 @@ registracije$mjesta %>%
 # `[[:upper:]]` i `[[:lower:]]` su klase koje označavaju velika odnosno mala
 # slova.
 
-# `\\s` označava razmak (ostavljanje praznog mjesta također funkcionira). 
+# `\\s` označava razmak (ostavljanje praznog mjesta također funkcionira).
 
 # Dakle, obrazac koji tražimo mora počinjati s velikim slovom kojem slijedi
 # jedno ili više malih slova.
@@ -519,7 +519,7 @@ podaci$pi_income <- podaci$pi_income %>%
     fct_recode(.,
                'avg' = "About the average",
                'avg_pp' = "Much above the average",
-               'avg_mm' = "Much below the average", 
+               'avg_mm' = "Much below the average",
                'avg_p' = "Somewhat above the average",
                'avg_m' = "Somewhat below the average")
 
