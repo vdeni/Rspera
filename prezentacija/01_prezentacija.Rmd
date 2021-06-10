@@ -87,5 +87,5 @@ https://suzanbaert.netlify.app/2018/01/dplyr-tutorial-1/
 ## Resursi
 
 - RStudio šalabahteri za razne R pakete: https://www.rstudio.com/resources/cheatsheets/
-- R ikona nastale na temelju [FontAwesome](https://fontawesome.com/) ikona
-koje su pokrivene CC-BY 4.0 [licencom](https://fontawesome.com/license).
+- Ikone su [FontAwesome](https://fontawesome.com/) ili njihove modifikacije.
+FontAwesome ikone su pokrivene CC-BY 4.0 [licencom](https://fontawesome.com/license).
