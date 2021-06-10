@@ -8,8 +8,8 @@ https://www.cessda.eu/Training/Training-Resources/Library/Data-Management-Expert
 https://suzanbaert.netlify.app/2018/01/dplyr-tutorial-1/
 - Šalabahter za razne regularne izraze: https://remram44.github.io/regex-cheatsheet/regex.html
 - RStudio šalabahteri za razne R pakete: https://www.rstudio.com/resources/cheatsheets/
-- R ikona nastale na temelju [FontAwesome](https://fontawesome.com/) ikona
-koje su pokrivene CC-BY 4.0 [licencom](https://fontawesome.com/license).
+- Ikone su [FontAwesome](https://fontawesome.com/) ili njihove modifikacije.
+FontAwesome ikone su pokrivene CC-BY 4.0 [licencom](https://fontawesome.com/license).
 
 Struktura repozitorija:
 - `kod`: skripte korištene u webinaru
