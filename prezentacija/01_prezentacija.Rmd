@@ -73,7 +73,7 @@ class: sectionSlide
 
 ---
 
-## Resursi
+## Rsursi
 
 - *CESSDA Data Management Expert Guide:* 
 https://www.cessda.eu/Training/Training-Resources/Library/Data-Management-Expert-Guide
@@ -84,7 +84,7 @@ https://suzanbaert.netlify.app/2018/01/dplyr-tutorial-1/
 
 ---
 
-## Resursi
+## Rsursi
 
 - RStudio šalabahteri za razne R pakete: https://www.rstudio.com/resources/cheatsheets/
 - Ikone su [FontAwesome](https://fontawesome.com/) ili njihove modifikacije.
